@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -101,11 +102,10 @@ private fun SoftKeyboard(
                         .padding(2.dp)
                         .width(if (keyTileValue.key == KEY_DEL) 46.dp else 28.dp)
                         .align(Alignment.CenterVertically),
+                    elevation = ButtonDefaults.elevatedButtonElevation(),
+                    shape = ShapeDefaults.ExtraSmall,
                     contentPadding = PaddingValues(2.dp),
-
-                    colors = ButtonDefaults.textButtonColors(
-                        containerColor = Color(keyTileValue.color) // contentColor
-                    ),
+                    colors = ButtonDefaults.textButtonColors(containerColor = Color(keyTileValue.color)),
                     onClick = { onCurrentGuessChange(keyTileValue.key) },
                 ) {
                     Text(
@@ -141,7 +141,7 @@ private fun BoardRows(
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun GameBoardPreview() {
     WordDuelTheme {
         GameBoardScreen(
             onCurrentGuessChange = { }
