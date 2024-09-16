@@ -11,8 +11,9 @@ import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.game.state.Guess
 import com.tomaszrykala.wordduel.game.state.KeyTiles
 import com.tomaszrykala.wordduel.game.state.isGuessNotEmpty
+import javax.inject.Inject
 
-class GuessProcessor { // @Inject constructor() // add an interface?
+class GuessProcessor @Inject constructor() {
 
     private val dictionary: Trie = Trie()
 
@@ -28,13 +29,13 @@ class GuessProcessor { // @Inject constructor() // add an interface?
         return if (state.word.isGuessed && state.board.boardRows.none { it.isActive }) {
             state
         } else if (!dictionary.search(guess.guessAsString())) {
-            processNonWord(guess, state)
+            processNonWord(state, guess)
         } else {
-            processWord(state, guess)
+            processWord(guess, state)
         }
     }
 
-    private fun processWord(state: GameState, guess: Guess): GameState {
+    private fun processWord(guess: Guess, state: GameState): GameState {
         val word = state.word
         val keyTiles = state.keyTiles
         val currentBoard = state.board
@@ -72,7 +73,7 @@ class GuessProcessor { // @Inject constructor() // add an interface?
         }
     }
 
-    private fun processNonWord(guess: Guess, state: GameState): GameState {
+    private fun processNonWord(state: GameState, guess: Guess): GameState {
         return if (guess.isGuessNotEmpty()) {
             val currentBoard = state.board
             val indexOfActive = currentBoard.boardRows.indexOfFirst { it.isActive }

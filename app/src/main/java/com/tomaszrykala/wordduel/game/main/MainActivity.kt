@@ -24,7 +24,8 @@ class MainActivity : ComponentActivity() {
                 val state: GameState by viewModel.state.collectAsState()
                 GameBoardScreen(
                     state = state,
-                    onCurrentGuessChange = viewModel::onCurrentGuessChange
+                    onKeyTileClick = viewModel::onKeyTileClick,
+                    onNewGuess = viewModel::updateGameState, // onNewGuess
                 )
             }
         }

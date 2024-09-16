@@ -14,8 +14,7 @@ data class GameState(
 
     val guess: Guess = Guess(),
 
-    val currentGuess: MutableList<String> = mutableListOf() // TODO: looks dodgy
-
+    // val currentGuess: List<String> = mutableListOf() // TODO: looks dodgy
     // val wordIndex: Int,
     // val isStale: Boolean,
     // val isUnlimited: Boolean = false

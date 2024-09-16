@@ -20,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +34,7 @@ import com.tomaszrykala.wordduel.BoardTile
 import com.tomaszrykala.wordduel.R
 import com.tomaszrykala.wordduel.game.board.Board
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
+import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.game.state.KeyTiles
 import com.tomaszrykala.wordduel.ui.theme.WordDuelTheme
@@ -42,8 +44,16 @@ import com.tomaszrykala.wordduel.ui.theme.wordDuelTitleStyle
 fun GameBoardScreen(
     modifier: Modifier = Modifier,
     state: GameState = GameState(),
-    onCurrentGuessChange: (s: String) -> Unit,
+    onKeyTileClick: (k: KeyTile) -> Unit,
+    onNewGuess: () -> Unit
 ) {
+
+    println("CSQ guess 1: " +state.guess)
+    LaunchedEffect(state.guess) {
+        println("CSQ guess 2: " +state.guess)
+        onNewGuess()
+    }
+
     val scrollState = rememberScrollState()
 
     Box(
@@ -69,7 +79,7 @@ fun GameBoardScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
-            SoftKeyboard(state.keyTiles, onCurrentGuessChange)
+            SoftKeyboard(state.keyTiles, onKeyTileClick)
 
         }
     }
@@ -78,7 +88,7 @@ fun GameBoardScreen(
 @Composable
 private fun SoftKeyboard(
     keyTiles: KeyTiles,
-    onCurrentGuessChange: (s: String) -> Unit
+    onKeyTileClick: (k: KeyTile) -> Unit
 ) {
 
     // CLEARS ON CFG CHANGE
@@ -106,7 +116,7 @@ private fun SoftKeyboard(
                     shape = ShapeDefaults.ExtraSmall,
                     contentPadding = PaddingValues(2.dp),
                     colors = ButtonDefaults.textButtonColors(containerColor = Color(keyTileValue.color)),
-                    onClick = { onCurrentGuessChange(keyTileValue.key) },
+                    onClick = { onKeyTileClick(keyTileValue) },
                 ) {
                     Text(
                         text = keyTileValue.key,
@@ -144,7 +154,8 @@ private fun BoardRows(
 fun GameBoardPreview() {
     WordDuelTheme {
         GameBoardScreen(
-            onCurrentGuessChange = { }
+            onKeyTileClick = { },
+            onNewGuess = { },
         )
     }
 }
