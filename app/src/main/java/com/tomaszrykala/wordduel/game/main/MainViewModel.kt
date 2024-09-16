@@ -1,7 +1,6 @@
 package com.tomaszrykala.wordduel.game.main
 
 import androidx.lifecycle.ViewModel
-import com.tomaszrykala.wordduel.game.board.Board
 import com.tomaszrykala.wordduel.game.board.BoardRow
 import com.tomaszrykala.wordduel.game.board.Tile
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
@@ -32,46 +31,54 @@ class MainViewModel @Inject constructor(
         } else {
             currentGuess = (currentGuess + keyTile.key).toMutableList()
         }
-        if (currentGuess.size == 5) {
-            currentGuess = mutableListOf()
-        }
         _state.value = _state.value.copy(guess = Guess(currentGuess))
     }
 
-     fun updateGameState() {
+    fun clearCurrentGuess() {
+        if (currentGuess.size == 5) {
+            currentGuess = mutableListOf()
+            _state.value = _state.value.copy(guess = Guess(currentGuess))
+        }
+    }
+
+    fun updateGameState() {
         val guess = state.value.guess
-        val stateWithCachedKeyTiles = state.value
-        // val stateWithCachedKeyTiles = state.value.copy(keyTiles = keyTiles)
-        val processed: GameState = guessProcessor.processGuess(stateWithCachedKeyTiles, guess)
-        // val processedKeyTiles = processed.keyTiles
-        if (guess.isGuessNotEmpty()) {
-            // TODO save progress?
-        } else {
-            val board = processed.board
-            val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
-            if (indexOfActive != -1) {
-                val tiles = mutableListOf<Tile>()
-                for (index in 0..4) {
-                    val guessChars = guess.guess
-                    if (index < guessChars.size && guessChars[index].isNotEmpty()) {
-                        tiles.add(Tile.Active(guessChars[index].last()))
-                    } else {
-                        tiles.add(Tile.Active())
-                    }
+        val gameState: GameState = state.value
+        val processed: GameState = guessProcessor.processGuess(gameState)
+        val board = processed.board
+        val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
+        if (indexOfActive != -1) {
+            val tiles = mutableListOf<Tile>()
+            for (index in 0..4) {
+                val guessChars = guess.guess
+                if (index < guessChars.size && guessChars[index].isNotEmpty()) {
+                    tiles.add(Tile.Active(guessChars[index].last()))
+                } else {
+                    tiles.add(Tile.Active())
                 }
-
-                val updatedBoardRow = board.boardRows[indexOfActive].copy(
-                    tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
-                )
-                val newBoardRows: List<BoardRow> = board.boardRows.mapIndexed { index, boardRow ->
-                    if (index == indexOfActive) updatedBoardRow else boardRow
-                }
-                val newBoard: Board = board.copy(boardRows = newBoardRows)
-                _state.value = processed.copy(board = newBoard)
-
-            } else {
-                _state.value = processed
             }
+
+            val updatedBoardRow = board.boardRows[indexOfActive].copy(
+                tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
+            )
+            val newBoardRows: List<BoardRow> = board.boardRows.mapIndexed { index, boardRow ->
+                if (index == indexOfActive) updatedBoardRow else boardRow
+            }
+            _state.value = processed.copy(
+                board = board.copy(boardRows = newBoardRows),
+                keyTiles = processed.keyTiles,
+                word = processed.word
+            )
+
+        } else {
+            _state.value = processed.copy(
+                keyTiles = processed.keyTiles,
+                word = processed.word
+            )
+        }
+
+        if (guess.isGuessNotEmpty()) {
+            clearCurrentGuess()
         }
     }
 }

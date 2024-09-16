@@ -45,12 +45,10 @@ fun GameBoardScreen(
     modifier: Modifier = Modifier,
     state: GameState = GameState(),
     onKeyTileClick: (k: KeyTile) -> Unit,
-    onNewGuess: () -> Unit
+    onNewGuess: () -> Unit,
 ) {
 
-    println("CSQ guess 1: " +state.guess)
     LaunchedEffect(state.guess) {
-        println("CSQ guess 2: " +state.guess)
         onNewGuess()
     }
 

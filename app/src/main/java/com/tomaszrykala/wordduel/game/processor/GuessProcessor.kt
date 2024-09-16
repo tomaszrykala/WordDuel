@@ -10,7 +10,6 @@ import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.game.state.Guess
 import com.tomaszrykala.wordduel.game.state.KeyTiles
-import com.tomaszrykala.wordduel.game.state.isGuessNotEmpty
 import javax.inject.Inject
 
 class GuessProcessor @Inject constructor() {
@@ -25,23 +24,25 @@ class GuessProcessor @Inject constructor() {
         }
     }
 
-    fun processGuess(state: GameState, guess: Guess): GameState {
+    fun processGuess(state: GameState): GameState {
         return if (state.word.isGuessed && state.board.boardRows.none { it.isActive }) {
             state
-        } else if (!dictionary.search(guess.guessAsString())) {
-            processNonWord(state, guess)
+//        } else if (!dictionary.search(guess.guessAsString())) {
+//            processNonWord(state, guess)
+        } else if (state.guess.isGuessNotEmpty().not()) {
+            processNonWord(state)
         } else {
-            processWord(guess, state)
+            processWord(state)
         }
     }
 
-    private fun processWord(guess: Guess, state: GameState): GameState {
+    private fun processWord(state: GameState): GameState {
         val word = state.word
         val keyTiles = state.keyTiles
         val currentBoard = state.board
         val nextBoardRows = currentBoard.boardRows.toMutableList()
 
-        val (processedBoard, newKeyTiles) = processBoard(word, guess, keyTiles)
+        val (processedBoard, newKeyTiles) = processBoard(word, state.guess, keyTiles)
 
         // make the previous row inactive
         val indexOfInactive = if (currentBoard.isFull) {
@@ -73,8 +74,8 @@ class GuessProcessor @Inject constructor() {
         }
     }
 
-    private fun processNonWord(state: GameState, guess: Guess): GameState {
-        return if (guess.isGuessNotEmpty()) {
+    private fun processNonWord(state: GameState): GameState {
+        return if (state.guess.isGuessNotEmpty()) {
             val currentBoard = state.board
             val indexOfActive = currentBoard.boardRows.indexOfFirst { it.isActive }
             val nextBoardRows = currentBoard.boardRows.toMutableList()
@@ -118,13 +119,9 @@ class GuessProcessor @Inject constructor() {
             }
         }
 
-        val boardRow = BoardRow(
-            tile0 = processed[0],
-            tile1 = processed[1],
-            tile2 = processed[2],
-            tile3 = processed[3],
-            tile4 = processed[4]
-        )
+        val boardRow = with(processed) {
+            BoardRow(tile0 = this[0], tile1 = this[1], tile2 = this[2], tile3 = this[3], tile4 = this[4])
+        }
         return boardRow to mutableKeyTiles
     }
 

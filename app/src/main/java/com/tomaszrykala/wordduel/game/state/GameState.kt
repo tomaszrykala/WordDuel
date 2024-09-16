@@ -11,15 +11,7 @@ data class GameState(
     val word: BoardRow = boardRowFromString("hello"),
     val keyTiles: KeyTiles = KeyTiles(),
     val nonWordEntered: Boolean = false,
-
-    val guess: Guess = Guess(),
-
-    // val currentGuess: List<String> = mutableListOf() // TODO: looks dodgy
-    // val wordIndex: Int,
-    // val isStale: Boolean,
-    // val isUnlimited: Boolean = false
-    //     val keyTiles: List<List<KeyTile>> = createKeyTiles()
-    //  val guess: List<String> = mutableListOf("", "", "", "", "")
+    val guess: Guess = Guess()
 )
 
 data class Guess(val guess: List<String> = mutableListOf("", "", "", "", "")) { // TODO listOf
