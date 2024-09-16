@@ -9,7 +9,13 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -56,3 +62,14 @@ fun WordDuelTheme(
         content = content
     )
 }
+
+val wordDuelTitleStyle = TextStyle(
+    color = Color.White,
+    fontSize = 32.sp,
+    fontWeight = FontWeight.ExtraBold,
+    shadow = Shadow(
+        color = Color.DarkGray,
+        offset = Offset(4f, 4f),
+        blurRadius = 4f
+    )
+)

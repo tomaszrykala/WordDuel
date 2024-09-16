@@ -8,6 +8,8 @@ import com.tomaszrykala.wordduel.game.board.Tile
 import com.tomaszrykala.wordduel.game.board.emptyActiveBoardRow
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.state.GameState
+import com.tomaszrykala.wordduel.game.state.Guess
+import com.tomaszrykala.wordduel.game.state.KeyTiles
 import com.tomaszrykala.wordduel.game.state.isGuessNotEmpty
 
 class GuessProcessor { // @Inject constructor() // add an interface?
@@ -22,19 +24,17 @@ class GuessProcessor { // @Inject constructor() // add an interface?
         }
     }
 
-    fun processGuess(state: GameState, guess: List<String>): GameState {
-        val guessAsString = guess.joinToString(separator = "") { it }.lowercase()
-
+    fun processGuess(state: GameState, guess: Guess): GameState {
         return if (state.word.isGuessed && state.board.boardRows.none { it.isActive }) {
             state
-        } else if (!dictionary.search(guessAsString)) {
+        } else if (!dictionary.search(guess.guessAsString())) {
             processNonWord(guess, state)
         } else {
             processWord(state, guess)
         }
     }
 
-    private fun processWord(state: GameState, guess: List<String>): GameState {
+    private fun processWord(state: GameState, guess: Guess): GameState {
         val word = state.word
         val keyTiles = state.keyTiles
         val currentBoard = state.board
@@ -64,7 +64,7 @@ class GuessProcessor { // @Inject constructor() // add an interface?
             GameState(
                 word = word,
                 board = Board(nextBoardRows),
-                keyTiles = newKeyTiles,
+                keyTiles = KeyTiles(newKeyTiles),
 //                wordIndex = state.wordIndex,
 //                isStale = state.isStale,
 //                isUnlimited = state.isUnlimited
@@ -72,7 +72,7 @@ class GuessProcessor { // @Inject constructor() // add an interface?
         }
     }
 
-    private fun processNonWord(guess: List<String>, state: GameState): GameState {
+    private fun processNonWord(guess: Guess, state: GameState): GameState {
         return if (guess.isGuessNotEmpty()) {
             val currentBoard = state.board
             val indexOfActive = currentBoard.boardRows.indexOfFirst { it.isActive }
@@ -80,7 +80,7 @@ class GuessProcessor { // @Inject constructor() // add an interface?
             nextBoardRows[indexOfActive] = emptyActiveBoardRow()
 
             state.copy(
-                guess = emptyList(),
+                guess = Guess(),
                 board = Board(nextBoardRows),
                 nonWordEntered = true // TODO careful, could be dangerous (?)
             )
@@ -91,13 +91,13 @@ class GuessProcessor { // @Inject constructor() // add an interface?
 
 
     private fun processBoard(
-        word: BoardRow, guess: List<String>, keyTiles: List<List<KeyTile>>
+        word: BoardRow, guess: Guess, keyTiles: KeyTiles
     ): Pair<BoardRow, List<List<KeyTile>>> {
 
-        val mutableKeyTiles = keyTiles.map { it.toMutableList() } // TODO AWFUL complexity
+        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() } // TODO AWFUL complexity
         val tilesAsWord = word.tilesAsWord
 
-        val processed: List<Tile> = guess.mapIndexed { index, letter ->
+        val processed: List<Tile> = guess.guess.mapIndexed { index, letter ->
             val char: Char = letter.last()
 
             when {
