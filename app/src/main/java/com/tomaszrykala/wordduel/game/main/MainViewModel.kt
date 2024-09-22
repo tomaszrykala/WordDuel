@@ -35,6 +35,11 @@ class MainViewModel @Inject constructor(
         _state.value = _state.value.copy(guess = currentGuess)
     }
 
+    fun onNewGameClick() {
+        currentGuess = Guess()
+        _state.value = GameState()
+    }
+
     private fun clearCurrentGuess() {
         if (currentGuess.isFull()) {
             currentGuess = Guess()
@@ -44,9 +49,9 @@ class MainViewModel @Inject constructor(
 
     fun updateGameState() {
         val guess = state.value.guess
-        val gameState: GameState = state.value
-        val processed: GameState = guessProcessor.processGuess(gameState)
+        val processed: GameState = guessProcessor.processGuess(state.value)
         val board = processed.board
+
         val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
         if (indexOfActive != -1) {
             val tiles = mutableListOf<Tile>()

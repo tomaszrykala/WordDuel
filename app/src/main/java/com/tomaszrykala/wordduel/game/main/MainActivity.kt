@@ -25,6 +25,7 @@ class MainActivity : ComponentActivity() {
                 GameBoardScreen(
                     state = state,
                     onKeyTileClick = viewModel::onKeyTileClick,
+                    onNewGameClick = viewModel::onNewGameClick,
                     onNewGuess = viewModel::updateGameState, // onNewGuess
                 )
             }

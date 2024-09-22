@@ -15,12 +15,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +50,7 @@ fun GameBoardScreen(
     modifier: Modifier = Modifier,
     state: GameState = GameState(),
     onKeyTileClick: (k: KeyTile) -> Unit,
+    onNewGameClick: () -> Unit,
     onNewGuess: () -> Unit,
 ) {
 
@@ -79,7 +85,58 @@ fun GameBoardScreen(
 
             SoftKeyboard(state.keyTiles, onKeyTileClick)
 
+            if (state.board.isEnded) {
+                GameEndedDialog(
+                    word = state.word.tilesAsWord,
+                    attempt = state.board.attemptCount,
+                    isGuessed = state.board.isGuessed,
+                    onNewGameClick = onNewGameClick
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun GameEndedDialog(
+    word: String,
+    attempt: Int,
+    isGuessed: Boolean,
+    onNewGameClick: () -> Unit,
+) {
+
+    var showDialog by rememberSaveable { mutableStateOf(true) } // isEnded?
+    val onDismissRequest = { showDialog = false }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = {
+                val text = if (isGuessed) "Congratulations!" else "Oops!"
+                Text(text)
+            },
+            text = {
+                val text = if (isGuessed) "You guessed in $attempt out of 6 attempts."
+                else "The word was: '$word'.\nBetter luck next time."
+                Text(text)
+            },
+            confirmButton = {
+                Button(onClick = {
+                    onDismissRequest.invoke()
+                    onNewGameClick.invoke()
+                }) { Text(stringResource(android.R.string.ok)) }
+            },
+
+//            confirmButton = {
+//                Button(onClick = onDismissRequest) { Text(stringResource(android.R.string.ok)) }
+//            },
+//            dismissButton = {
+//                Button(onClick = {
+//                    onDismissRequest.invoke()
+//                    onNewGameClick.invoke()
+//                }) { Text("New Game") }
+//            },
+        )
     }
 }
 
@@ -153,6 +210,7 @@ fun GameBoardPreview() {
     WordDuelTheme {
         GameBoardScreen(
             onKeyTileClick = { },
+            onNewGameClick = { },
             onNewGuess = { },
         )
     }

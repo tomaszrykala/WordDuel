@@ -9,5 +9,7 @@ data class BoardRow(
     val isActive: Boolean = tiles.all { it is Tile.Active }
     val isEmpty: Boolean = tiles.all { it.letter().isEmpty() }
     val isInactive: Boolean = tiles.all { it is Tile.Inactive }
-    val tilesAsWord = tiles.joinToString { it.letter() }
+
+    // val tilesAsWord = tiles.joinToString { it.letter() }
+    val tilesAsWord: String = "${tile0.letter()}${tile1.letter()}${tile2.letter()}${tile3.letter()}${tile4.letter()}"
 }

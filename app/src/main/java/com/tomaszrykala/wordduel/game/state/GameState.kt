@@ -15,7 +15,7 @@ data class GameState(
 )
 
 data class Guess(val guess: List<String> = listOf()) {
-    fun isFull() : Boolean = guess.size == 5
+    fun isFull(): Boolean = guess.size == 5
     fun isGuessNotEmpty(): Boolean = with(guess) { isFull() && this.all { it != "" } }
     fun guessAsString(): String = guess.joinToString(separator = "") { it }.lowercase()
 }

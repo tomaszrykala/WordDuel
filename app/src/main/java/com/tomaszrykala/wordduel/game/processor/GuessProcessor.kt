@@ -42,7 +42,7 @@ class GuessProcessor @Inject constructor() {
         val currentBoard = state.board
         val nextBoardRows = currentBoard.boardRows.toMutableList()
 
-        val (processedBoard, newKeyTiles) = processBoard(word, state.guess, keyTiles)
+        val (processedBoardRow, newKeyTiles) = processBoardRow(word, state.guess, keyTiles)
 
         // make the previous row inactive
         val indexOfInactive = if (currentBoard.isFull) {
@@ -51,15 +51,15 @@ class GuessProcessor @Inject constructor() {
             currentBoard.boardRows.indexOfFirst { it.isActive }
         }
 
-        // prevent duplication on configuration change
-        return if (indexOfInactive > 0 && processedBoard == currentBoard.boardRows[indexOfInactive - 1]) {
+        // prevent duplication on configuration change // TODO ?!
+        return if (indexOfInactive > 0 && processedBoardRow == currentBoard.boardRows[indexOfInactive - 1]) {
             state
         } else {
-            nextBoardRows[indexOfInactive] = processedBoard
+            nextBoardRows[indexOfInactive] = processedBoardRow
 
             // make the next one row active, unless the word has been guessed
             if (indexOfInactive + 1 < nextBoardRows.size) {
-                if (!processedBoard.isGuessed) {
+                if (!processedBoardRow.isGuessed) {
                     nextBoardRows[indexOfInactive + 1] = emptyActiveBoardRow()
                 }
             }
@@ -92,7 +92,7 @@ class GuessProcessor @Inject constructor() {
     }
 
 
-    private fun processBoard(
+    private fun processBoardRow(
         word: BoardRow, guess: Guess, keyTiles: KeyTiles
     ): Pair<BoardRow, List<List<KeyTile>>> {
 
