@@ -107,7 +107,7 @@ class GuessProcessor @Inject constructor() {
                     remapKeyTileColor(mutableKeyTiles, letter, Color.DarkGray)
                     Tile.Miss(char)
                 } // black
-                word.tiles[index].char() == letter -> {
+                word.tiles[index].letter() == letter -> {
                     remapKeyTileColor(mutableKeyTiles, letter, Color.Green)
                     Tile.Hit(char)
                 } // green

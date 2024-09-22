@@ -60,7 +60,7 @@ fun BoardTile(
         )
     ) {
         Text(
-            text = tile.char(),
+            text = tile.letter(),
             fontSize = 24.sp,
             modifier = Modifier
                 .padding(8.dp)

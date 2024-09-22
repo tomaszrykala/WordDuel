@@ -7,7 +7,7 @@ data class BoardRow(
     val tiles: List<Tile> = listOf(tile0, tile1, tile2, tile3, tile4)
     val isGuessed: Boolean = tiles.all { it is Tile.Hit }
     val isActive: Boolean = tiles.all { it is Tile.Active }
-    val isEmpty: Boolean = tiles.all { it.char().isEmpty() }
+    val isEmpty: Boolean = tiles.all { it.letter().isEmpty() }
     val isInactive: Boolean = tiles.all { it is Tile.Inactive }
-    val tilesAsWord = tiles.joinToString { it.char() }
+    val tilesAsWord = tiles.joinToString { it.letter() }
 }
