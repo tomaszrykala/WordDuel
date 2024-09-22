@@ -7,15 +7,16 @@ import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.keyboard.createKeyTiles
 
 data class GameState(
-    var board: Board = Board(),
+    val board: Board = Board(),
     val word: BoardRow = boardRowFromString("hello"),
     val keyTiles: KeyTiles = KeyTiles(),
     val nonWordEntered: Boolean = false,
     val guess: Guess = Guess()
 )
 
-data class Guess(val guess: List<String> = mutableListOf("", "", "", "", "")) { // TODO listOf
-    fun isGuessNotEmpty(): Boolean = with(guess) { this.size == 5 && this.all { it != "" } }
+data class Guess(val guess: List<String> = listOf()) {
+    fun isFull() : Boolean = guess.size == 5
+    fun isGuessNotEmpty(): Boolean = with(guess) { isFull() && this.all { it != "" } }
     fun guessAsString(): String = guess.joinToString(separator = "") { it }.lowercase()
 }
 

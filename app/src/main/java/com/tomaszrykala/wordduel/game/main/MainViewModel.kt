@@ -21,23 +21,24 @@ class MainViewModel @Inject constructor(
     private val _state = MutableStateFlow(GameState())
     val state: StateFlow<GameState> = _state
 
-    private var currentGuess = mutableListOf<String>() // or `= Guess()`
+    private var currentGuess = Guess()
 
     fun onKeyTileClick(keyTile: KeyTile) {
+        val guess: List<String> = currentGuess.guess
         if (KEY_DEL == keyTile.key) {
-            if (currentGuess.isNotEmpty()) {
-                currentGuess = currentGuess.subList(0, currentGuess.size - 1)
+            if (guess.isNotEmpty()) {
+                currentGuess = Guess(guess.subList(0, guess.size - 1))
             }
         } else {
-            currentGuess = (currentGuess + keyTile.key).toMutableList()
+            currentGuess = Guess(guess + keyTile.key)
         }
-        _state.value = _state.value.copy(guess = Guess(currentGuess))
+        _state.value = _state.value.copy(guess = currentGuess)
     }
 
-    fun clearCurrentGuess() {
-        if (currentGuess.size == 5) {
-            currentGuess = mutableListOf()
-            _state.value = _state.value.copy(guess = Guess(currentGuess))
+    private fun clearCurrentGuess() {
+        if (currentGuess.isFull()) {
+            currentGuess = Guess()
+            _state.value = _state.value.copy(guess = currentGuess)
         }
     }
 
