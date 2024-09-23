@@ -1,5 +1,6 @@
 package com.tomaszrykala.wordduel.game.processor
 
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.tomaszrykala.wordduel.game.board.Board
@@ -10,26 +11,19 @@ import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.game.state.Guess
 import com.tomaszrykala.wordduel.game.state.KeyTiles
+import com.tomaszrykala.wordduel.repository.WordRepository
 import javax.inject.Inject
 
-class GuessProcessor @Inject constructor() {
+class GuessProcessor @Inject constructor(private val wordRepository: WordRepository) {
 
-    private val dictionary: Trie = Trie()
+    suspend fun loadWords(context: Context): Result<Unit> = wordRepository.initDictionary(context)
 
-    init {
-        // TODO dummy data; initDictionary()
-        with(dictionary) {
-            insert("hello")
-            insert("world")
-        }
-    }
+    fun randomWord(): String = wordRepository.randomWord()
 
     fun processGuess(state: GameState): GameState {
         return if (state.word.isGuessed && state.board.boardRows.none { it.isActive }) {
             state
-//        } else if (!dictionary.search(guess.guessAsString())) {
-//            processNonWord(state, guess)
-        } else if (state.guess.isGuessNotEmpty().not()) {
+        } else if (!wordRepository.searchWord(state.guess.guessAsString())) {
             processNonWord(state)
         } else {
             processWord(state)

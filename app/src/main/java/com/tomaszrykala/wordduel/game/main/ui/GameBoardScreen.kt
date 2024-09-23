@@ -1,5 +1,6 @@
 package com.tomaszrykala.wordduel.game.main.ui
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
@@ -22,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,10 +42,11 @@ fun GameBoardScreen(
     onKeyTileClick: (k: KeyTile) -> Unit = {},
     onNewGameClick: () -> Unit = {},
     onNewGuess: () -> Unit = {},
-    onStart: () -> Unit = {},
+    onStart: (context: Context) -> Unit = {},
 ) {
+    val context = LocalContext.current
     LaunchedEffect(state.isStarting) {
-        onStart()
+        onStart(context)
     }
 
     LaunchedEffect(state.guess) {

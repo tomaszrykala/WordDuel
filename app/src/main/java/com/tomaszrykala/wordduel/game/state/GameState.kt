@@ -13,9 +13,10 @@ data class GameState(
     val nonWordEntered: Boolean = false,
 
     val isLoading: Boolean = false,
-    val isStarting: Boolean = true,
+    val isStarting: Boolean = false,
     val isEnded: Boolean = board.isEnded,
     val isGuessed: Boolean = board.isGuessed,
+    val error: String? = null,
 )
 // Init(starting), Loading, Success, Error
 

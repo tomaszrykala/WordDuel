@@ -9,6 +9,8 @@ internal class Trie {
 
     private val root = Node()
 
+    val isEmpty: Boolean get() = root.childNodes.isEmpty()
+
     fun insert(word: String) {
         var currentNode = root
         for (char in word) {
@@ -41,4 +43,6 @@ internal class Trie {
         }
         return currentNode.word == null
     }
+
+    // fun randomWord() : String
 }

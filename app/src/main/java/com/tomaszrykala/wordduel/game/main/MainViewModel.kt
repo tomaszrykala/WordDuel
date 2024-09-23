@@ -1,20 +1,20 @@
 package com.tomaszrykala.wordduel.game.main
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tomaszrykala.wordduel.game.board.BoardRow
 import com.tomaszrykala.wordduel.game.board.Tile
+import com.tomaszrykala.wordduel.game.board.boardRowFromString
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.processor.GuessProcessor
 import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.game.state.Guess
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,17 +27,28 @@ class MainViewModel @Inject constructor(
 
     private var currentGuess = Guess()
 
-    fun onStart() {
+    // TODO get rid of the context here
+    fun onStart(context: Context) {
         if (_state.value.isStarting && _state.value.isLoading.not()) {
             _state.value = _state.value.copy(isLoading = true)
             println("CSQ isLoading: true")
 
             viewModelScope.launch {
-                // delay(3000) // debug
-
-
-                _state.value = _state.value.copy(isStarting = false, isLoading = false)
-                println("CSQ isLoading: false")
+                guessProcessor.loadWords(context).fold(
+                    onSuccess = {
+                        val word = guessProcessor.randomWord()
+                        println("CSQ isLoading: false, with SUCCESS, word: $word")
+                        _state.value = _state.value.copy(
+                            isStarting = false,
+                            isLoading = false,
+                            word = boardRowFromString(word)
+                        )
+                    },
+                    onFailure = {
+                        println("CSQ isLoading: false, with error: ${it.message}")
+                        _state.value = _state.value.copy(isLoading = false, error = it.message)
+                    }
+                )
             }
         }
     }
@@ -56,7 +67,7 @@ class MainViewModel @Inject constructor(
 
     fun onNewGameClick() {
         currentGuess = Guess()
-        _state.value = GameState()
+        _state.value = GameState(word = boardRowFromString(guessProcessor.randomWord()))
     }
 
     private fun clearCurrentGuess() {
