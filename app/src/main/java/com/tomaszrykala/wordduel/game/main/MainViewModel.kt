@@ -22,15 +22,15 @@ class MainViewModel @Inject constructor(
     private val guessProcessor: GuessProcessor,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(GameState(isStarting = true))
+    private val _state: MutableStateFlow<GameState> = MutableStateFlow(GameState.Init)
     val state: StateFlow<GameState> = _state
 
     private var currentGuess = Guess()
 
-    // TODO get rid of the context here
-    fun onStart(context: Context) {
-        if (_state.value.isStarting && _state.value.isLoading.not()) {
-            _state.value = _state.value.copy(isLoading = true)
+    fun onStart(context: Context) { // Get rid of Context, inject into the Repo.
+        val gameState = _state.value
+        if (gameState is GameState.Init) {
+            _state.value = GameState.Loading
             println("CSQ isLoading: true")
 
             viewModelScope.launch {
@@ -38,15 +38,11 @@ class MainViewModel @Inject constructor(
                     onSuccess = {
                         val word = guessProcessor.randomWord()
                         println("CSQ isLoading: false, with SUCCESS, word: $word")
-                        _state.value = _state.value.copy(
-                            isStarting = false,
-                            isLoading = false,
-                            word = boardRowFromString(word)
-                        )
+                        _state.value = GameState.InProgress(word = boardRowFromString(word))
                     },
                     onFailure = {
                         println("CSQ isLoading: false, with error: ${it.message}")
-                        _state.value = _state.value.copy(isLoading = false, error = it.message)
+                        _state.value = GameState.Error(it)
                     }
                 )
             }
@@ -62,25 +58,26 @@ class MainViewModel @Inject constructor(
         } else {
             currentGuess = Guess(guess + keyTile.key)
         }
-        _state.value = _state.value.copy(guess = currentGuess)
+        _state.value = (_state.value as GameState.InProgress).copy(guess = currentGuess)
     }
 
     fun onNewGameClick() {
         currentGuess = Guess()
         val word = guessProcessor.randomWord()
-        _state.value = GameState(word = boardRowFromString(word))
+        _state.value = GameState.InProgress(word = boardRowFromString(word))
     }
 
     private fun clearCurrentGuess() {
         if (currentGuess.isFull()) {
             currentGuess = Guess()
-            _state.value = _state.value.copy(guess = currentGuess)
+            _state.value = (_state.value as GameState.InProgress).copy(guess = currentGuess)
         }
     }
 
     fun updateGameState() {
-        val guess = state.value.guess
-        val processed: GameState = guessProcessor.processGuess(state.value)
+        val value = state.value as GameState.InProgress
+        val guess = value.guess
+        val processed: GameState.InProgress = guessProcessor.processGuess(value)
         val board = processed.board
 
         val indexOfActive = board.boardRows.indexOfFirst { it.isActive }

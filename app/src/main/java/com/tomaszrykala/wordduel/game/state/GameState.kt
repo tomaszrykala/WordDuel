@@ -5,20 +5,40 @@ import com.tomaszrykala.wordduel.game.board.BoardRow
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.keyboard.createKeyTiles
 
-data class GameState(
-    val board: Board = Board(),
-    val word: BoardRow = board.boardRows.first(),
-    val keyTiles: KeyTiles = KeyTiles(),
-    val guess: Guess = Guess(),
-    val nonWordEntered: Boolean = false,
-
-    val isLoading: Boolean = false,
-    val isStarting: Boolean = false,
-    val isEnded: Boolean = board.isEnded,
-    val isGuessed: Boolean = board.isGuessed,
-    val error: String? = null,
-)
+//data class GameState(
+//    val board: Board = Board(),
+//    val word: BoardRow = board.boardRows.first(),
+//    val keyTiles: KeyTiles = KeyTiles(),
+//    val guess: Guess = Guess(),
+//    val nonWordEntered: Boolean = false,
+//
+//    val isLoading: Boolean = false,
+//    val isStarting: Boolean = false,
+//    val isEnded: Boolean = board.isEnded,
+//    val isGuessed: Boolean = board.isGuessed,
+//    val error: String? = null,
+//)
 // Init(starting), Loading, Success, Error
+
+sealed class GameState {
+    data object Init : GameState()
+    data object Loading : GameState()
+    data class Error(val throwable: Throwable) : GameState()
+    data class InProgress(
+        val board: Board = Board(),
+        val keyTiles: KeyTiles = KeyTiles(),
+        val word: BoardRow = board.boardRows.first(),
+        val guess: Guess = Guess(),
+        val nonWordEntered: Boolean = false,
+    ) : GameState()
+
+    data class GameEnded(
+        val board: Board = Board(),
+        val keyTiles: KeyTiles = KeyTiles(),
+        val word: BoardRow = board.boardRows.first(),
+        val isGuessed: Boolean = board.isGuessed
+    ) : GameState()
+}
 
 data class Guess(val guess: List<String> = listOf()) {
     fun isFull(): Boolean = guess.size == 5

@@ -38,19 +38,26 @@ import com.tomaszrykala.wordduel.ui.theme.wordDuelTitleStyle
 @Composable
 fun GameBoardScreen(
     modifier: Modifier = Modifier,
-    state: GameState = GameState(),
+    state: GameState = GameState.Init,
     onKeyTileClick: (k: KeyTile) -> Unit = {},
     onNewGameClick: () -> Unit = {},
     onNewGuess: () -> Unit = {},
     onStart: (context: Context) -> Unit = {},
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(state.isStarting) {
-        onStart(context)
-    }
 
-    LaunchedEffect(state.guess) {
-        onNewGuess()
+    when(state) {
+        is GameState.InProgress -> {
+            LaunchedEffect(state.guess) {
+                onNewGuess()
+            }
+        }
+        GameState.Init -> {
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                onStart(context)
+            }
+        }
+        else -> Unit
     }
 
     BoxWithConstraints(
@@ -64,11 +71,11 @@ fun GameBoardScreen(
             GameBoardLandscape(state, onKeyTileClick, onNewGameClick)
         }
 
-        if (state.isLoading) {
+        if (state is GameState.Loading) {
             DictionaryLoadingDialog()
         }
 
-        if (state.isEnded) {
+        if (state is GameState.GameEnded) {
             GameEndedDialog(
                 word = state.word.tilesAsWord, attempt = state.board.attemptCount, isGuessed = state.isGuessed
             )
@@ -135,7 +142,7 @@ private fun GameBoardLandscape(
 }
 
 @Composable
-private fun BoardRowsSection(state: GameState) {
+private fun BoardRowsSection(state: GameState.InProgress) {
     Spacer(modifier = Modifier.padding(16.dp))
 
     state.board.boardRows.forEach { boardRow ->
@@ -158,16 +165,26 @@ private fun KeyboardAndNewGameSection(
     onKeyTileClick: (k: KeyTile) -> Unit,
     onNewGameClick: () -> Unit
 ) {
-    SoftKeyboard(state.keyTiles, onKeyTileClick)
+    when (state) {
+        is GameState.Error -> TODO()
+        is GameState.GameEnded -> {
+            SoftKeyboard(state.keyTiles, onKeyTileClick)
 
-    if (state.isEnded) {
-        Button(
-            modifier = Modifier
-                .padding(32.dp)
-                .fillMaxWidth(),
-            shape = ButtonDefaults.elevatedShape,
-            onClick = onNewGameClick
-        ) { Text("New Game") }
+            Button(
+                modifier = Modifier
+                    .padding(32.dp)
+                    .fillMaxWidth(),
+                shape = ButtonDefaults.elevatedShape,
+                onClick = onNewGameClick
+            ) { Text("New Game") }
+        }
+
+        is GameState.InProgress -> {
+            SoftKeyboard(state.keyTiles, onKeyTileClick)
+        }
+
+        GameState.Init -> TODO()
+        GameState.Loading -> TODO()
     }
 }
 
@@ -195,7 +212,7 @@ fun EndedLostGameBoardPreview() {
 @Composable
 fun EndedWonGameBoardPreview() {
     WordDuelTheme {
-        GameBoardScreen(state = GameState().copy(isEnded = true, isGuessed = true))
+        GameBoardScreen(state = GameState.GameEnded(isGuessed = true))
     }
 }
 
@@ -203,7 +220,7 @@ fun EndedWonGameBoardPreview() {
 @Composable
 fun LoadingGameBoardPreview() {
     WordDuelTheme {
-        GameBoardScreen(state = GameState().copy(isLoading = true))
+        GameBoardScreen(state = GameState.Loading)
     }
 }
 
@@ -219,6 +236,6 @@ fun ClearGameBoardLandscapePreview() {
 @Composable
 fun EndedWonGameBoardLandscapePreview() {
     WordDuelTheme {
-        GameBoardScreen(state = GameState().copy(isEnded = true, isGuessed = true))
+        GameBoardScreen(state = GameState.GameEnded(isGuessed = true))
     }
 }
