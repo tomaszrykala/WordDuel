@@ -9,8 +9,7 @@ import java.io.InputStream
 import javax.inject.Inject
 
 class WordRepository @Inject constructor(
-    private val readerFactory: BufferedReaderFactory,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val readerFactory: BufferedReaderFactory
 ) {
 
     private val dictionary: Trie = Trie()
@@ -19,7 +18,7 @@ class WordRepository @Inject constructor(
     suspend fun initDictionary(context: Context): Result<Unit> {
         if (words.isEmpty()) {
             runCatching {
-                withContext(ioDispatcher) {
+                withContext(Dispatchers.IO) {
                     val inputStream: InputStream = context.resources.openRawResource(WORDS_ALL)
                     val reader = readerFactory.bufferedReader(inputStream)
                     val readLines = readerFactory.processLines(reader)
