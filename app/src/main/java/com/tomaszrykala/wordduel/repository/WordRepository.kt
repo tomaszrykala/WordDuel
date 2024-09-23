@@ -2,21 +2,24 @@ package com.tomaszrykala.wordduel.repository
 
 import android.content.Context
 import com.tomaszrykala.wordduel.R
-import com.tomaszrykala.wordduel.game.processor.Trie
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import javax.inject.Inject
 
-class WordRepository @Inject constructor(private val readerFactory: BufferedReaderFactory) {
+class WordRepository @Inject constructor(
+    private val readerFactory: BufferedReaderFactory,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
 
-    private val dictionary: Trie = Trie() // 1,5MB allocation :|
-    private val words: MutableList<String> = mutableListOf() // TODO: Bad for perf, heavy on memory, but 25K alloc?
+    private val dictionary: Trie = Trie()
+    private val words: MutableList<String> = mutableListOf()
 
     suspend fun initDictionary(context: Context): Result<Unit> {
-        if (dictionary.isEmpty) { // words.isEmpty()
+        if (words.isEmpty()) {
             runCatching {
-                withContext(Dispatchers.IO) {
+                withContext(ioDispatcher) {
                     val inputStream: InputStream = context.resources.openRawResource(WORDS_ALL)
                     val reader = readerFactory.bufferedReader(inputStream)
                     val readLines = readerFactory.processLines(reader)
@@ -36,10 +39,7 @@ class WordRepository @Inject constructor(private val readerFactory: BufferedRead
         }
     }
 
-    fun randomWord(): String {
-        // return dictionary.random()
-        return words.random()
-    }
+    fun randomWord(): String = words.random()
 
     fun searchWord(word: String): Boolean = dictionary.search(word)
 

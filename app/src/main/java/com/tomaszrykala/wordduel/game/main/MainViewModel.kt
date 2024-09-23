@@ -34,7 +34,7 @@ class MainViewModel @Inject constructor(
             println("CSQ isLoading: true")
 
             viewModelScope.launch {
-                guessProcessor.loadWords(context).fold(
+                guessProcessor.init(context).fold(
                     onSuccess = {
                         val word = guessProcessor.randomWord()
                         println("CSQ isLoading: false, with SUCCESS, word: $word")
@@ -67,7 +67,8 @@ class MainViewModel @Inject constructor(
 
     fun onNewGameClick() {
         currentGuess = Guess()
-        _state.value = GameState(word = boardRowFromString(guessProcessor.randomWord()))
+        val word = guessProcessor.randomWord()
+        _state.value = GameState(word = boardRowFromString(word))
     }
 
     private fun clearCurrentGuess() {

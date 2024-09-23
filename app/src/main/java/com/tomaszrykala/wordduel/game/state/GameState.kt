@@ -26,6 +26,10 @@ data class Guess(val guess: List<String> = listOf()) {
     fun guessAsString(): String = guess.joinToString(separator = "") { it }.lowercase()
 }
 
-data class KeyTiles(val keyTiles: List<List<KeyTile>> = createKeyTiles())
+data class KeyTiles(val keyTiles: List<List<KeyTile>> = createKeyTiles()) {
+    val top get() = keyTiles[0]
+    val mid get() = keyTiles[1]
+    val bottom get() = keyTiles[2]
+}
 
 fun List<String>.isGuessNotEmpty(): Boolean = this.size == 5 && this.all { it != "" }

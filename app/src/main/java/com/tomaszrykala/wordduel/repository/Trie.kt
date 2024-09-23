@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.processor
+package com.tomaszrykala.wordduel.repository
 
 internal class Trie {
 
@@ -8,8 +8,6 @@ internal class Trie {
     )
 
     private val root = Node()
-
-    val isEmpty: Boolean get() = root.childNodes.isEmpty()
 
     fun insert(word: String) {
         var currentNode = root
@@ -43,6 +41,4 @@ internal class Trie {
         }
         return currentNode.word == null
     }
-
-    // fun randomWord() : String
 }

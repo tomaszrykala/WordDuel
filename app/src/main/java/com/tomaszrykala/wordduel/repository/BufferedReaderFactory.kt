@@ -12,7 +12,7 @@ class BufferedReaderFactory @Inject constructor() {
         InputStreamReader(inputStream, Charset.forName(CHAR_SET))
     )
 
-    suspend fun processLines(reader: BufferedReader): List<String> = reader.readLines()
+    fun processLines(reader: BufferedReader): List<String> = reader.readLines()
 
     private companion object {
         const val CHAR_SET = "UTF-8"

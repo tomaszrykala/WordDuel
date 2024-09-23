@@ -29,11 +29,9 @@ fun SoftKeyboard(
     onKeyTileClick: (k: KeyTile) -> Unit
 ) {
 
-    val top = keyTiles.keyTiles[0]
-    val mid = keyTiles.keyTiles[1]
-    val bottom = keyTiles.keyTiles[2]
+    val listOfTiles = listOf(keyTiles.top, keyTiles.mid, keyTiles.bottom)
 
-    listOf(top, mid, bottom).forEach { row ->
+    listOfTiles.forEach { row ->
         Row(
             modifier = Modifier
                 .fillMaxWidth()
