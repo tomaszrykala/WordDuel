@@ -166,28 +166,20 @@ private fun BoardRowsSection(state: GameState.InProgress) {
 
 @Composable
 private fun KeyboardAndNewGameSection(
-    state: GameState,
+    state: GameState.InProgress,
     onKeyTileClick: (k: KeyTile) -> Unit,
     onNewGameClick: () -> Unit
 ) {
-    when (state) {
-        is GameState.Error -> TODO()
-        is GameState.InProgress -> {
-            SoftKeyboard(state.keyTiles, onKeyTileClick)
+    SoftKeyboard(state.keyTiles, onKeyTileClick)
 
-            if (state.isEnded) {
-                Button(
-                    modifier = Modifier
-                        .padding(32.dp)
-                        .fillMaxWidth(),
-                    shape = ButtonDefaults.elevatedShape,
-                    onClick = onNewGameClick
-                ) { Text("New Game") }
-            }
-        }
-
-        GameState.Init -> TODO()
-        GameState.Loading -> TODO()
+    if (state.isEnded) {
+        Button(
+            modifier = Modifier
+                .padding(32.dp)
+                .fillMaxWidth(),
+            shape = ButtonDefaults.elevatedShape,
+            onClick = onNewGameClick
+        ) { Text("New Game") }
     }
 }
 
