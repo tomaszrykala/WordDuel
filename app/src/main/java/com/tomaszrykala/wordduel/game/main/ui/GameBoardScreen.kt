@@ -4,16 +4,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -32,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,32 +61,15 @@ fun GameBoardScreen(
         onNewGuess()
     }
 
-    val scrollState = rememberScrollState()
-
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .background(Color.Gray)
             .fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier
-                .scrollable(state = scrollState, orientation = Orientation.Vertical, enabled = true)
-                .align(Alignment.Center)
-                .padding(16.dp)
-        ) {
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = stringResource(id = R.string.app_name),
-                style = wordDuelTitleStyle,
-            )
-
-            Spacer(modifier = Modifier.padding(16.dp))
-
-            BoardRows(state.board, state.nonWordEntered)
-
-            Spacer(modifier = Modifier.padding(16.dp))
-
-            SoftKeyboard(state.keyTiles, onKeyTileClick)
+        if (maxWidth < MAX_WIDTH.dp) {
+            GameBoardPortrait(state, onKeyTileClick)
+        } else {
+            GameBoardLandscape(state, onKeyTileClick)
         }
 
         if (state.isLoading) {
@@ -97,6 +83,68 @@ fun GameBoardScreen(
                 isGuessed = state.isGuessed,
                 onNewGameClick = onNewGameClick
             )
+        }
+    }
+}
+
+@Composable
+private fun GameBoardPortrait(
+    state: GameState,
+    onKeyTileClick: (k: KeyTile) -> Unit
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .scrollable(state = scrollState, orientation = Orientation.Vertical, enabled = true)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = stringResource(id = R.string.app_name),
+            style = wordDuelTitleStyle,
+        )
+
+        Spacer(modifier = Modifier.padding(16.dp))
+
+        BoardRows(state.board, state.nonWordEntered)
+
+        Spacer(modifier = Modifier.padding(16.dp))
+
+        SoftKeyboard(state.keyTiles, onKeyTileClick)
+    }
+}
+
+@Composable
+private fun GameBoardLandscape(
+    state: GameState,
+    onKeyTileClick: (k: KeyTile) -> Unit
+) {
+    Row(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .wrapContentSize(Alignment.Center)
+                .weight(0.5f),
+        ) {
+            Text(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                text = stringResource(id = R.string.app_name),
+                style = wordDuelTitleStyle,
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            BoardRows(state.board, state.nonWordEntered)
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .wrapContentSize(Alignment.Center)
+                .weight(0.5f)
+        ) {
+            SoftKeyboard(state.keyTiles, onKeyTileClick)
         }
     }
 }
@@ -150,7 +198,6 @@ private fun SoftKeyboard(
     onKeyTileClick: (k: KeyTile) -> Unit
 ) {
 
-    // CLEARS ON CFG CHANGE
     val top = keyTiles.keyTiles[0]
     val mid = keyTiles.keyTiles[1]
     val bottom = keyTiles.keyTiles[2]
@@ -190,6 +237,7 @@ private fun SoftKeyboard(
     }
 }
 
+private const val MAX_WIDTH = 600 // hardcoded, best way?
 
 @Composable
 private fun BoardRows(
@@ -208,7 +256,7 @@ private fun BoardRows(
 }
 
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun ClearGameBoardPreview() {
     WordDuelTheme {
@@ -216,7 +264,15 @@ fun ClearGameBoardPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(device = Devices.TABLET)
+@Composable
+fun ClearGameBoardLandscapePreview() {
+    WordDuelTheme {
+        GameBoardScreen()
+    }
+}
+
+@Preview()
 @Composable
 fun EndedLostGameBoardPreview() {
     WordDuelTheme {
@@ -224,7 +280,7 @@ fun EndedLostGameBoardPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun EndedWonGameBoardPreview() {
     WordDuelTheme {
@@ -232,7 +288,7 @@ fun EndedWonGameBoardPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun LoadingGameBoardPreview() {
     WordDuelTheme {
