@@ -22,12 +22,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WordDuelTheme {
-                val state: GameState by viewModel.state.collectAsState()
+                val state: GameState by viewModel.state.collectAsState() // with Lifecycle?
                 GameBoardScreen(
                     state = state,
                     onKeyTileClick = viewModel::onKeyTileClick,
                     onNewGameClick = viewModel::onNewGameClick,
                     onNewGuess = viewModel::updateGameState, // onNewGuess
+                    onStart = viewModel::onStart,
                 )
             }
         }

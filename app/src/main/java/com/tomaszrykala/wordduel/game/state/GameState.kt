@@ -2,21 +2,22 @@ package com.tomaszrykala.wordduel.game.state
 
 import com.tomaszrykala.wordduel.game.board.Board
 import com.tomaszrykala.wordduel.game.board.BoardRow
-import com.tomaszrykala.wordduel.game.board.boardRowFromString
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.keyboard.createKeyTiles
 
 data class GameState(
     val board: Board = Board(),
-    val word: BoardRow = boardRowFromString("hello"),
+    val word: BoardRow = board.boardRows.first(),
     val keyTiles: KeyTiles = KeyTiles(),
     val guess: Guess = Guess(),
     val nonWordEntered: Boolean = false,
 
     val isLoading: Boolean = false,
+    val isStarting: Boolean = true,
     val isEnded: Boolean = board.isEnded,
     val isGuessed: Boolean = board.isGuessed,
 )
+// Init(starting), Loading, Success, Error
 
 data class Guess(val guess: List<String> = listOf()) {
     fun isFull(): Boolean = guess.size == 5

@@ -40,7 +40,11 @@ fun GameBoardScreen(
     onKeyTileClick: (k: KeyTile) -> Unit = {},
     onNewGameClick: () -> Unit = {},
     onNewGuess: () -> Unit = {},
+    onStart: () -> Unit = {},
 ) {
+    LaunchedEffect(state.isStarting) {
+        onStart()
+    }
 
     LaunchedEffect(state.guess) {
         onNewGuess()

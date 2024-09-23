@@ -1,6 +1,7 @@
 package com.tomaszrykala.wordduel.game.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tomaszrykala.wordduel.game.board.BoardRow
 import com.tomaszrykala.wordduel.game.board.Tile
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
@@ -9,8 +10,11 @@ import com.tomaszrykala.wordduel.game.processor.GuessProcessor
 import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.game.state.Guess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,10 +22,25 @@ class MainViewModel @Inject constructor(
     private val guessProcessor: GuessProcessor,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(GameState())
+    private val _state = MutableStateFlow(GameState(isStarting = true))
     val state: StateFlow<GameState> = _state
 
     private var currentGuess = Guess()
+
+    fun onStart() {
+        if (_state.value.isStarting && _state.value.isLoading.not()) {
+            _state.value = _state.value.copy(isLoading = true)
+            println("CSQ isLoading: true")
+
+            viewModelScope.launch {
+                // delay(3000) // debug
+
+
+                _state.value = _state.value.copy(isStarting = false, isLoading = false)
+                println("CSQ isLoading: false")
+            }
+        }
+    }
 
     fun onKeyTileClick(keyTile: KeyTile) {
         val guess: List<String> = currentGuess.guess
