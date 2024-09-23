@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.tomaszrykala.wordduel.game.main.ui.GameBoardScreen
 import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.ui.theme.WordDuelTheme
 import dagger.hilt.android.AndroidEntryPoint

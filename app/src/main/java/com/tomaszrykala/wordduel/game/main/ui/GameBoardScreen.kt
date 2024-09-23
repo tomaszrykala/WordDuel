@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.main
+package com.tomaszrykala.wordduel.game.main.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -49,9 +49,9 @@ import com.tomaszrykala.wordduel.ui.theme.wordDuelTitleStyle
 fun GameBoardScreen(
     modifier: Modifier = Modifier,
     state: GameState = GameState(),
-    onKeyTileClick: (k: KeyTile) -> Unit,
-    onNewGameClick: () -> Unit,
-    onNewGuess: () -> Unit,
+    onKeyTileClick: (k: KeyTile) -> Unit = {},
+    onNewGameClick: () -> Unit = {},
+    onNewGuess: () -> Unit = {},
 ) {
 
     LaunchedEffect(state.guess) {
@@ -61,14 +61,14 @@ fun GameBoardScreen(
     val scrollState = rememberScrollState()
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .background(Color.Gray)
+            .fillMaxSize()
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
                 .scrollable(state = scrollState, orientation = Orientation.Vertical, enabled = true)
-                .align(Alignment.TopCenter)
-                .background(Color.Gray)
+                .align(Alignment.Center)
                 .padding(16.dp)
         ) {
             Text(
@@ -84,17 +84,31 @@ fun GameBoardScreen(
             Spacer(modifier = Modifier.padding(16.dp))
 
             SoftKeyboard(state.keyTiles, onKeyTileClick)
+        }
 
-            if (state.board.isEnded) {
-                GameEndedDialog(
-                    word = state.word.tilesAsWord,
-                    attempt = state.board.attemptCount,
-                    isGuessed = state.board.isGuessed,
-                    onNewGameClick = onNewGameClick
-                )
-            }
+        if (state.isLoading) {
+            DictionaryLoadingDialog()
+        }
+
+        if (state.isEnded) {
+            GameEndedDialog(
+                word = state.word.tilesAsWord,
+                attempt = state.board.attemptCount,
+                isGuessed = state.isGuessed,
+                onNewGameClick = onNewGameClick
+            )
         }
     }
+}
+
+@Composable
+private fun DictionaryLoadingDialog() {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("Loading dictionary...") },
+        text = { Text("Please wait") },
+        confirmButton = {} // Replace with a Custom Dialog with a Spinner
+    )
 }
 
 @Composable
@@ -126,16 +140,6 @@ private fun GameEndedDialog(
                     onNewGameClick.invoke()
                 }) { Text(stringResource(android.R.string.ok)) }
             },
-
-//            confirmButton = {
-//                Button(onClick = onDismissRequest) { Text(stringResource(android.R.string.ok)) }
-//            },
-//            dismissButton = {
-//                Button(onClick = {
-//                    onDismissRequest.invoke()
-//                    onNewGameClick.invoke()
-//                }) { Text("New Game") }
-//            },
         )
     }
 }
@@ -206,12 +210,32 @@ private fun BoardRows(
 
 @Preview(showBackground = true)
 @Composable
-fun GameBoardPreview() {
+fun ClearGameBoardPreview() {
     WordDuelTheme {
-        GameBoardScreen(
-            onKeyTileClick = { },
-            onNewGameClick = { },
-            onNewGuess = { },
-        )
+        GameBoardScreen()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EndedLostGameBoardPreview() {
+    WordDuelTheme {
+        GameBoardScreen(state = GameState().copy(isEnded = true))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EndedWonGameBoardPreview() {
+    WordDuelTheme {
+        GameBoardScreen(state = GameState().copy(isEnded = true, isGuessed = true))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoadingGameBoardPreview() {
+    WordDuelTheme {
+        GameBoardScreen(state = GameState().copy(isLoading = true))
     }
 }

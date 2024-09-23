@@ -91,7 +91,6 @@ class GuessProcessor @Inject constructor() {
         }
     }
 
-
     private fun processBoardRow(
         word: BoardRow, guess: Guess, keyTiles: KeyTiles
     ): Pair<BoardRow, List<List<KeyTile>>> {

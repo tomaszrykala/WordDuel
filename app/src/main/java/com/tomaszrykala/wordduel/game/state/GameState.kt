@@ -10,8 +10,12 @@ data class GameState(
     val board: Board = Board(),
     val word: BoardRow = boardRowFromString("hello"),
     val keyTiles: KeyTiles = KeyTiles(),
+    val guess: Guess = Guess(),
     val nonWordEntered: Boolean = false,
-    val guess: Guess = Guess()
+
+    val isLoading: Boolean = false,
+    val isEnded: Boolean = board.isEnded,
+    val isGuessed: Boolean = board.isGuessed,
 )
 
 data class Guess(val guess: List<String> = listOf()) {

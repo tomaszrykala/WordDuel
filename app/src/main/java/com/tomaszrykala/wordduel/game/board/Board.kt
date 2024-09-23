@@ -5,8 +5,8 @@ import java.lang.IllegalArgumentException
 data class Board(val boardRows: List<BoardRow> = startGameBoard()) {
 
     val isFull: Boolean = boardRows.none { it.isActive }
-    val isGuessed: Boolean = boardRows.any { it.isGuessed }
-    val isEnded: Boolean = isFull || isGuessed
+    internal val isGuessed: Boolean = boardRows.any { it.isGuessed }
+    internal val isEnded: Boolean = isFull || isGuessed
     val attemptCount: Int = boardRows.indexOfFirst { it.isGuessed } + 1 // it's zero-based
     val isEmpty: Boolean = with(boardRows[0]) { this.isActive && this.isEmpty }
 }
