@@ -123,7 +123,7 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
         word: BoardRow, guess: Guess, keyTiles: KeyTiles
     ): Pair<BoardRow, List<List<KeyTile>>> {
 
-        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() } // TODO AWFUL complexity
+        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() } // TODO awful complexity
         val tilesAsWord = word.tilesAsWord
 
         val processed: List<Tile> = guess.guess.mapIndexed { index, letter ->

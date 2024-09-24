@@ -15,11 +15,7 @@ fun createKeyTiles(): List<List<KeyTile>> {
 
 const val KEY_DEL = "[DEL]"
 val COLOR_DEFAULT = Color.LightGray.toArgb()
-// private const val KEY_ENTER = "[ENTER]"
 
 private val keyboardTopRow = listOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P")
 private val keyboardMidRow = listOf("A", "S", "D", "F", "G", "H", "J", "K", "L")
-private val keyboardBottomRow = listOf(
-    "Z", "X", "C", "V", "B", "N", "M",
-    KEY_DEL //, KEY_ENTER
-)
+private val keyboardBottomRow = listOf("Z", "X", "C", "V", "B", "N", "M", KEY_DEL)

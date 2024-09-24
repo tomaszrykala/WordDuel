@@ -25,7 +25,7 @@ class MainViewModel @Inject constructor(
 
     private var currentGuess = Guess()
 
-    fun onStart(context: Context) { // TODO Get rid of Context, inject into the Repo.
+    fun onStart(context: Context) { // Get rid of Context, inject into the Repo?
         if (_state.value is GameState.Init) {
             _state.value = GameState.Loading
             viewModelScope.launch {
