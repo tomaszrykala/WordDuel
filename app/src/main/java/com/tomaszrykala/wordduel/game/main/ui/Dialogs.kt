@@ -18,7 +18,26 @@ fun DictionaryLoadingDialog() {
         onDismissRequest = {},
         title = { Text("Loading dictionary...") },
         text = { Text("Please wait") },
-        confirmButton = {} // Replace with a Custom Dialog with a Spinner
+        confirmButton = {}
+    )
+}
+
+@Composable
+fun ErrorDialog(text: String, onRetry: () -> Unit) {
+
+    var showDialog by rememberSaveable { mutableStateOf(true) }
+    val onDismissRequest = { showDialog = false }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Error loading!") },
+        text = { Text(text) },
+        confirmButton = {
+            Button(onClick = {
+                onDismissRequest.invoke()
+                onRetry.invoke()
+            }) { Text(stringResource(android.R.string.ok)) }
+        }
     )
 }
 
@@ -27,7 +46,7 @@ fun GameEndedDialog(
     word: String, attempt: Int, isGuessed: Boolean
 ) {
 
-    var showDialog by rememberSaveable { mutableStateOf(true) } // isEnded?
+    var showDialog by rememberSaveable { mutableStateOf(true) }
     val onDismissRequest = { showDialog = false }
 
     if (showDialog) {
@@ -56,6 +75,15 @@ fun DictionaryLoadingDialogPreview() {
         DictionaryLoadingDialog()
     }
 }
+
+@Preview
+@Composable
+fun ErrorDialogDialogPreview() {
+    WordDuelTheme {
+        ErrorDialog("Bad!") {}
+    }
+}
+
 
 @Preview
 @Composable

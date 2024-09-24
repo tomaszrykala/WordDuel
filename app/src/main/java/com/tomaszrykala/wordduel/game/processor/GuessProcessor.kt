@@ -20,24 +20,24 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
 
     fun randomWord(): String = wordRepository.randomWord()
 
-    fun processGuess(state: GameState): GameState {
-        return if (state.word.isGuessed && state.board.isFull) {
-            state
-        } else if (!wordRepository.searchWord(state.guess.guessAsString())) {
-            processNonWord(state)
+    fun processGuess(inProgress: GameState.InProgress): GameState.InProgress {
+        return if (inProgress.word.isGuessed && inProgress.board.isFull) {
+            inProgress
+        } else if (!wordRepository.searchWord(inProgress.guess.asString())) {
+            processNonWord(inProgress)
         } else {
-            processWord(state)
+            processWord(inProgress)
         }
     }
 
-    private fun processWord(state: GameState): GameState {
-        val word = state.word
-        val keyTiles = state.keyTiles
-        val currentBoard = state.board
+    private fun processWord(inProgress: GameState.InProgress): GameState.InProgress {
+        val word = inProgress.word
+        val keyTiles = inProgress.keyTiles
+        val currentBoard = inProgress.board
         val boardRows = currentBoard.boardRows
         val nextBoardRows = boardRows.toMutableList()
 
-        val (processedBoardRow, newKeyTiles) = processBoardRow(word, state.guess, keyTiles)
+        val (processedBoardRow, newKeyTiles) = processBoardRow(word, inProgress.guess, keyTiles)
 
         // make the previous row inactive
         val indexOfInactive = if (currentBoard.isFull) {
@@ -48,7 +48,7 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
 
         // prevent duplication on configuration change // TODO ?!
         return if (indexOfInactive > 0 && processedBoardRow == boardRows[indexOfInactive - 1]) {
-            state
+            inProgress
         } else {
             nextBoardRows[indexOfInactive] = processedBoardRow
 
@@ -58,14 +58,14 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
                     nextBoardRows[indexOfInactive + 1] = emptyActiveBoardRow()
                 }
             }
-            GameState(
+            GameState.InProgress(
                 word = word, board = Board(nextBoardRows), keyTiles = KeyTiles(newKeyTiles)
             )
         }
     }
 
-    private fun processNonWord(state: GameState): GameState {
-        return if (state.guess.isGuessNotEmpty()) {
+    private fun processNonWord(state: GameState.InProgress): GameState.InProgress {
+        return if (state.guess.isFull()) {
             val currentBoard = state.board
             val boardRows = currentBoard.boardRows
             val indexOfActive = boardRows.indexOfFirst { it.isActive }

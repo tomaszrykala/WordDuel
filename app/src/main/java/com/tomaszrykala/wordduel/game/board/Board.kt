@@ -8,7 +8,6 @@ data class Board(val boardRows: List<BoardRow> = startGameBoard()) {
     internal val isGuessed: Boolean = boardRows.any { it.isGuessed }
     internal val isEnded: Boolean = isFull || isGuessed
     val attemptCount: Int = boardRows.indexOfFirst { it.isGuessed } + 1 // it's zero-based
-    val isEmpty: Boolean = with(boardRows[0]) { this.isActive && this.isEmpty }
 }
 
 private fun startGameBoard() = listOf(

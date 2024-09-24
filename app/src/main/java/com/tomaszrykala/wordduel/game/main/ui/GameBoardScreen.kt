@@ -38,47 +38,62 @@ import com.tomaszrykala.wordduel.ui.theme.wordDuelTitleStyle
 @Composable
 fun GameBoardScreen(
     modifier: Modifier = Modifier,
-    state: GameState = GameState(),
+    state: GameState = GameState.Init,
     onKeyTileClick: (k: KeyTile) -> Unit = {},
     onNewGameClick: () -> Unit = {},
-    onNewGuess: () -> Unit = {},
+    onNextGuess: () -> Unit = {},
     onStart: (context: Context) -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(state.isStarting) {
-        onStart(context)
-    }
-
-    LaunchedEffect(state.guess) {
-        onNewGuess()
-    }
 
     BoxWithConstraints(
         modifier = modifier
             .background(Color.Gray)
             .fillMaxSize()
     ) {
-        if (maxWidth < MAX_WIDTH.dp) {
-            GameBoardPortrait(state, onKeyTileClick, onNewGameClick)
-        } else {
-            GameBoardLandscape(state, onKeyTileClick, onNewGameClick)
-        }
 
-        if (state.isLoading) {
-            DictionaryLoadingDialog()
-        }
+        when (state) {
+            GameState.Init -> {
+                val context = LocalContext.current
+                LaunchedEffect(Unit) {
+                    onStart(context)
+                }
+            }
 
-        if (state.isEnded) {
-            GameEndedDialog(
-                word = state.word.tilesAsWord, attempt = state.board.attemptCount, isGuessed = state.isGuessed
-            )
+            GameState.Loading -> {
+                DictionaryLoadingDialog()
+            }
+
+            is GameState.Error -> {
+                ErrorDialog(state.throwable.toString(), onRetry)
+            }
+
+            is GameState.InProgress -> {
+                LaunchedEffect(state.guess) {
+                    onNextGuess()
+                }
+
+                if (maxWidth < MAX_WIDTH.dp) {
+                    GameBoardPortrait(state, onKeyTileClick, onNewGameClick)
+                } else {
+                    GameBoardLandscape(state, onKeyTileClick, onNewGameClick)
+                }
+
+                if (state.isEnded) {
+                    GameEndedDialog(
+                        word = state.word.tilesAsWord,
+                        attempt = state.board.attemptCount,
+                        isGuessed = state.isGuessed
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 private fun GameBoardPortrait(
-    state: GameState,
+    state: GameState.InProgress,
     onKeyTileClick: (k: KeyTile) -> Unit,
     onNewGameClick: () -> Unit,
 ) {
@@ -104,7 +119,7 @@ private fun GameBoardPortrait(
 
 @Composable
 private fun GameBoardLandscape(
-    state: GameState,
+    state: GameState.InProgress,
     onKeyTileClick: (k: KeyTile) -> Unit,
     onNewGameClick: () -> Unit,
 ) {
@@ -135,7 +150,7 @@ private fun GameBoardLandscape(
 }
 
 @Composable
-private fun BoardRowsSection(state: GameState) {
+private fun BoardRowsSection(state: GameState.InProgress) {
     Spacer(modifier = Modifier.padding(16.dp))
 
     state.board.boardRows.forEach { boardRow ->
@@ -154,7 +169,7 @@ private fun BoardRowsSection(state: GameState) {
 
 @Composable
 private fun KeyboardAndNewGameSection(
-    state: GameState,
+    state: GameState.InProgress,
     onKeyTileClick: (k: KeyTile) -> Unit,
     onNewGameClick: () -> Unit
 ) {
@@ -187,7 +202,7 @@ fun ClearGameBoardPreview() {
 @Composable
 fun EndedLostGameBoardPreview() {
     WordDuelTheme {
-        GameBoardScreen(state = GameState().copy(isEnded = true))
+        GameBoardScreen(state = GameState.InProgress(isEnded = true))
     }
 }
 
@@ -195,7 +210,7 @@ fun EndedLostGameBoardPreview() {
 @Composable
 fun EndedWonGameBoardPreview() {
     WordDuelTheme {
-        GameBoardScreen(state = GameState().copy(isEnded = true, isGuessed = true))
+        GameBoardScreen(state = GameState.InProgress(isGuessed = true))
     }
 }
 
@@ -203,7 +218,15 @@ fun EndedWonGameBoardPreview() {
 @Composable
 fun LoadingGameBoardPreview() {
     WordDuelTheme {
-        GameBoardScreen(state = GameState().copy(isLoading = true))
+        GameBoardScreen(state = GameState.Loading)
+    }
+}
+
+@Preview
+@Composable
+fun ErrorGameBoardPreview() {
+    WordDuelTheme {
+        GameBoardScreen(state = GameState.Error(IllegalStateException("Bad!")))
     }
 }
 
@@ -219,6 +242,6 @@ fun ClearGameBoardLandscapePreview() {
 @Composable
 fun EndedWonGameBoardLandscapePreview() {
     WordDuelTheme {
-        GameBoardScreen(state = GameState().copy(isEnded = true, isGuessed = true))
+        GameBoardScreen(state = GameState.InProgress(isGuessed = true))
     }
 }
