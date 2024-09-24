@@ -3,8 +3,6 @@ package com.tomaszrykala.wordduel.game.main
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tomaszrykala.wordduel.game.board.BoardRow
-import com.tomaszrykala.wordduel.game.board.Tile
 import com.tomaszrykala.wordduel.game.board.boardRowFromString
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
@@ -68,45 +66,14 @@ class MainViewModel @Inject constructor(
 
     fun onNextGuess() {
         if (state.value is GameState.InProgress) {
-            val value = state.value as GameState.InProgress
-            val guess = value.guess
-            val processed: GameState.InProgress = guessProcessor.processGuess(value)
-            val board = processed.board
+            val inProgress = state.value as GameState.InProgress
+            val processed = guessProcessor.onNextGuess(inProgress)
 
-            val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
-            if (indexOfActive != -1) {
-                val tiles = mutableListOf<Tile>()
-                for (index in 0..4) {
-                    val guessChars = guess.guess
-                    if (index < guessChars.size && guessChars[index].isNotEmpty()) {
-                        tiles.add(Tile.Active(guessChars[index].last()))
-                    } else {
-                        tiles.add(Tile.Active())
-                    }
-                }
-
-                val updatedBoardRow = board.boardRows[indexOfActive].copy(
-                    tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
-                )
-                val newBoardRows: List<BoardRow> = board.boardRows.mapIndexed { index, boardRow ->
-                    if (index == indexOfActive) updatedBoardRow else boardRow
-                }
-                _state.value = processed.copy(
-                    board = board.copy(boardRows = newBoardRows),
-                    keyTiles = processed.keyTiles,
-                    word = processed.word
-                )
-
-            } else {
-                _state.value = processed.copy(
-                    keyTiles = processed.keyTiles,
-                    word = processed.word
-                )
-            }
-
-            if (guess.isFull()) {
+            if (inProgress.guess.isFull()) {
                 currentGuess = Guess()
-                _state.value = (_state.value as GameState.InProgress).copy(guess = currentGuess)
+                _state.value = processed.copy(guess = currentGuess)
+            } else {
+                _state.value = processed
             }
         }
     }
