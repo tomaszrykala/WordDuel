@@ -27,38 +27,33 @@ class MainViewModel @Inject constructor(
 
     private var currentGuess = Guess()
 
-    fun onStart(context: Context) { // Get rid of Context, inject into the Repo.
-        val gameState = _state.value
-        if (gameState is GameState.Init) {
+    fun onStart(context: Context) { // TODO Get rid of Context, inject into the Repo.
+        if (_state.value is GameState.Init) {
             _state.value = GameState.Loading
-            println("CSQ isLoading: true")
-
             viewModelScope.launch {
                 guessProcessor.init(context).fold(
                     onSuccess = {
                         val word = guessProcessor.randomWord()
-                        println("CSQ isLoading: false, with SUCCESS, word: $word")
                         _state.value = GameState.InProgress(word = boardRowFromString(word))
                     },
-                    onFailure = {
-                        println("CSQ isLoading: false, with error: ${it.message}")
-                        _state.value = GameState.Error(it)
-                    }
+                    onFailure = { _state.value = GameState.Error(it) }
                 )
             }
         }
     }
 
     fun onKeyTileClick(keyTile: KeyTile) {
-        val guess: List<String> = currentGuess.guess
-        if (KEY_DEL == keyTile.key) {
-            if (guess.isNotEmpty()) {
-                currentGuess = Guess(guess.subList(0, guess.size - 1))
+        if (state.value is GameState.InProgress) {
+            val guess: List<String> = currentGuess.guess
+            if (KEY_DEL == keyTile.key) {
+                if (guess.isNotEmpty()) {
+                    currentGuess = Guess(guess.subList(0, guess.size - 1))
+                }
+            } else {
+                currentGuess = Guess(guess + keyTile.key)
             }
-        } else {
-            currentGuess = Guess(guess + keyTile.key)
+            _state.value = (_state.value as GameState.InProgress).copy(guess = currentGuess)
         }
-        _state.value = (_state.value as GameState.InProgress).copy(guess = currentGuess)
     }
 
     fun onNewGameClick() {
@@ -67,52 +62,52 @@ class MainViewModel @Inject constructor(
         _state.value = GameState.InProgress(word = boardRowFromString(word))
     }
 
-    private fun clearCurrentGuess() {
-        if (currentGuess.isFull()) {
-            currentGuess = Guess()
-            _state.value = (_state.value as GameState.InProgress).copy(guess = currentGuess)
-        }
+    fun onRetry() {
+        _state.value = GameState.Init
     }
 
-    fun updateGameState() {
-        val value = state.value as GameState.InProgress
-        val guess = value.guess
-        val processed: GameState.InProgress = guessProcessor.processGuess(value)
-        val board = processed.board
+    fun onNextGuess() {
+        if (state.value is GameState.InProgress) {
+            val value = state.value as GameState.InProgress
+            val guess = value.guess
+            val processed: GameState.InProgress = guessProcessor.processGuess(value)
+            val board = processed.board
 
-        val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
-        if (indexOfActive != -1) {
-            val tiles = mutableListOf<Tile>()
-            for (index in 0..4) {
-                val guessChars = guess.guess
-                if (index < guessChars.size && guessChars[index].isNotEmpty()) {
-                    tiles.add(Tile.Active(guessChars[index].last()))
-                } else {
-                    tiles.add(Tile.Active())
+            val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
+            if (indexOfActive != -1) {
+                val tiles = mutableListOf<Tile>()
+                for (index in 0..4) {
+                    val guessChars = guess.guess
+                    if (index < guessChars.size && guessChars[index].isNotEmpty()) {
+                        tiles.add(Tile.Active(guessChars[index].last()))
+                    } else {
+                        tiles.add(Tile.Active())
+                    }
                 }
+
+                val updatedBoardRow = board.boardRows[indexOfActive].copy(
+                    tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
+                )
+                val newBoardRows: List<BoardRow> = board.boardRows.mapIndexed { index, boardRow ->
+                    if (index == indexOfActive) updatedBoardRow else boardRow
+                }
+                _state.value = processed.copy(
+                    board = board.copy(boardRows = newBoardRows),
+                    keyTiles = processed.keyTiles,
+                    word = processed.word
+                )
+
+            } else {
+                _state.value = processed.copy(
+                    keyTiles = processed.keyTiles,
+                    word = processed.word
+                )
             }
 
-            val updatedBoardRow = board.boardRows[indexOfActive].copy(
-                tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
-            )
-            val newBoardRows: List<BoardRow> = board.boardRows.mapIndexed { index, boardRow ->
-                if (index == indexOfActive) updatedBoardRow else boardRow
+            if (guess.isFull()) {
+                currentGuess = Guess()
+                _state.value = (_state.value as GameState.InProgress).copy(guess = currentGuess)
             }
-            _state.value = processed.copy(
-                board = board.copy(boardRows = newBoardRows),
-                keyTiles = processed.keyTiles,
-                word = processed.word
-            )
-
-        } else {
-            _state.value = processed.copy(
-                keyTiles = processed.keyTiles,
-                word = processed.word
-            )
-        }
-
-        if (guess.isGuessNotEmpty()) {
-            clearCurrentGuess()
         }
     }
 }

@@ -23,7 +23,7 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
     fun processGuess(inProgress: GameState.InProgress): GameState.InProgress {
         return if (inProgress.word.isGuessed && inProgress.board.isFull) {
             inProgress
-        } else if (!wordRepository.searchWord(inProgress.guess.guessAsString())) {
+        } else if (!wordRepository.searchWord(inProgress.guess.asString())) {
             processNonWord(inProgress)
         } else {
             processWord(inProgress)
@@ -65,7 +65,7 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
     }
 
     private fun processNonWord(state: GameState.InProgress): GameState.InProgress {
-        return if (state.guess.isGuessNotEmpty()) {
+        return if (state.guess.isFull()) {
             val currentBoard = state.board
             val boardRows = currentBoard.boardRows
             val indexOfActive = boardRows.indexOfFirst { it.isActive }

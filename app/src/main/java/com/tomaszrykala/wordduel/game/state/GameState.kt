@@ -21,9 +21,8 @@ sealed class GameState {
 }
 
 data class Guess(val guess: List<String> = listOf()) {
-    fun isFull(): Boolean = guess.size == 5
-    fun isGuessNotEmpty(): Boolean = with(guess) { isFull() && this.all { it != "" } }
-    fun guessAsString(): String = guess.joinToString(separator = "") { it }.lowercase()
+    fun isFull(): Boolean = with(guess) { size == 5 && this.all { it != "" } }
+    fun asString(): String = guess.joinToString(separator = "") { it }.lowercase()
 }
 
 data class KeyTiles(val keyTiles: List<List<KeyTile>> = createKeyTiles()) {

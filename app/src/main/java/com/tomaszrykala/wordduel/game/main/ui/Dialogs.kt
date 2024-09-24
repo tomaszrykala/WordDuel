@@ -18,12 +18,12 @@ fun DictionaryLoadingDialog() {
         onDismissRequest = {},
         title = { Text("Loading dictionary...") },
         text = { Text("Please wait") },
-        confirmButton = {} // Replace with a Custom Dialog with a Spinner
+        confirmButton = {}
     )
 }
 
 @Composable
-fun ErrorDialog(text: String) {
+fun ErrorDialog(text: String, onRetry: () -> Unit) {
 
     var showDialog by rememberSaveable { mutableStateOf(true) }
     val onDismissRequest = { showDialog = false }
@@ -33,7 +33,10 @@ fun ErrorDialog(text: String) {
         title = { Text("Error loading!") },
         text = { Text(text) },
         confirmButton = {
-            Button(onClick = onDismissRequest) { Text(stringResource(android.R.string.ok)) }
+            Button(onClick = {
+                onDismissRequest.invoke()
+                onRetry.invoke()
+            }) { Text(stringResource(android.R.string.ok)) }
         }
     )
 }
@@ -77,7 +80,7 @@ fun DictionaryLoadingDialogPreview() {
 @Composable
 fun ErrorDialogDialogPreview() {
     WordDuelTheme {
-        ErrorDialog("Bad!")
+        ErrorDialog("Bad!") {}
     }
 }
 

@@ -41,8 +41,9 @@ fun GameBoardScreen(
     state: GameState = GameState.Init,
     onKeyTileClick: (k: KeyTile) -> Unit = {},
     onNewGameClick: () -> Unit = {},
-    onNewGuess: () -> Unit = {},
+    onNextGuess: () -> Unit = {},
     onStart: (context: Context) -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
 
     BoxWithConstraints(
@@ -64,12 +65,12 @@ fun GameBoardScreen(
             }
 
             is GameState.Error -> {
-                ErrorDialog(state.throwable.toString())
+                ErrorDialog(state.throwable.toString(), onRetry)
             }
 
             is GameState.InProgress -> {
                 LaunchedEffect(state.guess) {
-                    onNewGuess()
+                    onNextGuess()
                 }
 
                 if (maxWidth < MAX_WIDTH.dp) {
@@ -80,7 +81,9 @@ fun GameBoardScreen(
 
                 if (state.isEnded) {
                     GameEndedDialog(
-                        word = state.word.tilesAsWord, attempt = state.board.attemptCount, isGuessed = state.isGuessed
+                        word = state.word.tilesAsWord,
+                        attempt = state.board.attemptCount,
+                        isGuessed = state.isGuessed
                     )
                 }
             }

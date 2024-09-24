@@ -27,8 +27,9 @@ class MainActivity : ComponentActivity() {
                     state = state,
                     onKeyTileClick = viewModel::onKeyTileClick,
                     onNewGameClick = viewModel::onNewGameClick,
-                    onNewGuess = viewModel::updateGameState, // onNewGuess
+                    onNextGuess = viewModel::onNextGuess,
                     onStart = viewModel::onStart,
+                    onRetry = viewModel::onRetry,
                 )
             }
         }
