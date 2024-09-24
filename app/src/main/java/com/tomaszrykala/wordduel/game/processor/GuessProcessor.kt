@@ -20,7 +20,44 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
 
     fun randomWord(): String = wordRepository.randomWord()
 
-    fun processGuess(inProgress: GameState.InProgress): GameState.InProgress {
+    fun onNextGuess(value: GameState.InProgress): GameState.InProgress {
+        val guess = value.guess
+        val processed: GameState.InProgress = processGuess(value)
+        val board = processed.board
+
+        val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
+        if (indexOfActive != -1) {
+            val tiles = mutableListOf<Tile>()
+            for (index in 0..4) {
+                val guessChars = guess.guess
+                if (index < guessChars.size && guessChars[index].isNotEmpty()) {
+                    tiles.add(Tile.Active(guessChars[index].last()))
+                } else {
+                    tiles.add(Tile.Active())
+                }
+            }
+
+            val updatedBoardRow = board.boardRows[indexOfActive].copy(
+                tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
+            )
+            val newBoardRows: List<BoardRow> = board.boardRows.mapIndexed { index, boardRow ->
+                if (index == indexOfActive) updatedBoardRow else boardRow
+            }
+            return processed.copy(
+                board = board.copy(boardRows = newBoardRows),
+                keyTiles = processed.keyTiles,
+                word = processed.word
+            )
+
+        } else {
+            return processed.copy(
+                keyTiles = processed.keyTiles,
+                word = processed.word
+            )
+        }
+    }
+
+    private fun processGuess(inProgress: GameState.InProgress): GameState.InProgress {
         return if (inProgress.word.isGuessed && inProgress.board.isFull) {
             inProgress
         } else if (!wordRepository.searchWord(inProgress.guess.asString())) {
@@ -86,7 +123,7 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
         word: BoardRow, guess: Guess, keyTiles: KeyTiles
     ): Pair<BoardRow, List<List<KeyTile>>> {
 
-        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() } // TODO AWFUL complexity
+        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() } // TODO awful complexity
         val tilesAsWord = word.tilesAsWord
 
         val processed: List<Tile> = guess.guess.mapIndexed { index, letter ->
