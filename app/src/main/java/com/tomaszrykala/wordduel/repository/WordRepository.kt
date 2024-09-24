@@ -33,7 +33,7 @@ class WordRepository @Inject constructor(
                 onFailure = { return Result.failure(it) }
             )
         } else {
-            return Result.failure(IllegalStateException("Requested init of an already initialised Repository."))
+            return Result.failure(IllegalStateException(RE_INIT_ATTEMPT_ERROR))
         }
     }
 
@@ -43,5 +43,6 @@ class WordRepository @Inject constructor(
 
     private companion object {
         val ALL_WORDS = R.raw.words
+        const val RE_INIT_ATTEMPT_ERROR = "Requested init of an already initialised Repository."
     }
 }

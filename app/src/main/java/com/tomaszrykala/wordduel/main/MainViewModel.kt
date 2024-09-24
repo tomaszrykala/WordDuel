@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.main
+package com.tomaszrykala.wordduel.main
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -25,7 +25,7 @@ class MainViewModel @Inject constructor(
 
     private var currentGuess = Guess()
 
-    fun onStart(context: Context) { // Get rid of Context, inject into the Repo?
+    fun onStart(context: Context) {
         if (_state.value is GameState.Init) {
             _state.value = GameState.Loading
             viewModelScope.launch {

@@ -14,7 +14,9 @@ import com.tomaszrykala.wordduel.game.state.KeyTiles
 import com.tomaszrykala.wordduel.repository.WordRepository
 import javax.inject.Inject
 
-class GuessProcessor @Inject constructor(private val wordRepository: WordRepository) {
+class GuessProcessor @Inject constructor(
+    private val wordRepository: WordRepository
+) {
 
     suspend fun init(context: Context): Result<Unit> = wordRepository.initDictionary(context)
 
@@ -69,12 +71,11 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
 
     private fun processWord(inProgress: GameState.InProgress): GameState.InProgress {
         val word = inProgress.word
-        val keyTiles = inProgress.keyTiles
         val currentBoard = inProgress.board
         val boardRows = currentBoard.boardRows
         val nextBoardRows = boardRows.toMutableList()
 
-        val (processedBoardRow, newKeyTiles) = processBoardRow(word, inProgress.guess, keyTiles)
+        val (processedBoardRow, newKeyTiles) = processBoardRow(word, inProgress.guess, inProgress.keyTiles)
 
         // make the previous row inactive
         val indexOfInactive = if (currentBoard.isFull) {
@@ -114,9 +115,7 @@ class GuessProcessor @Inject constructor(private val wordRepository: WordReposit
                 board = Board(nextBoardRows),
                 nonWordEntered = true
             )
-        } else {
-            state
-        }
+        } else state
     }
 
     private fun processBoardRow(

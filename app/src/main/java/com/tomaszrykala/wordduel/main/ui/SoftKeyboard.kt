@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.main.ui
+package com.tomaszrykala.wordduel.main.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
