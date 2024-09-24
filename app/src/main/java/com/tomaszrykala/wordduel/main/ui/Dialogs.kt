@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.main.ui
+package com.tomaszrykala.wordduel.main.ui
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button

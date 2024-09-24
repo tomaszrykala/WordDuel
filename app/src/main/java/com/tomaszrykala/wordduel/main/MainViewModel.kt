@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.main
+package com.tomaszrykala.wordduel.main
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

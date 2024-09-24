@@ -14,7 +14,7 @@
         android:theme="@style/Theme.WordDuel"
         tools:targetApi="31">
         <activity
-            android:name=".game.main.MainActivity"
+            android:name=".main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.WordDuel">
             <intent-filter>

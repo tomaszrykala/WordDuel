@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.main.ui
+package com.tomaszrykala.wordduel.main.ui
 
 import android.content.Context
 import androidx.compose.foundation.background
