@@ -2,7 +2,6 @@ package com.tomaszrykala.wordduel.repository
 
 import android.content.Context
 import com.tomaszrykala.wordduel.R
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
@@ -19,7 +18,7 @@ class WordRepository @Inject constructor(
         if (words.isEmpty()) {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val inputStream: InputStream = context.resources.openRawResource(WORDS_ALL)
+                    val inputStream: InputStream = context.resources.openRawResource(ALL_WORDS)
                     val reader = readerFactory.bufferedReader(inputStream)
                     val readLines = readerFactory.processLines(reader)
                     readLines.forEach {
@@ -43,6 +42,6 @@ class WordRepository @Inject constructor(
     fun searchWord(word: String): Boolean = dictionary.search(word)
 
     private companion object {
-        val WORDS_ALL = R.raw.five_letter_words
+        val ALL_WORDS = R.raw.words
     }
 }
