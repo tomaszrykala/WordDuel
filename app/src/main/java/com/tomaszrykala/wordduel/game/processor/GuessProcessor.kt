@@ -1,6 +1,7 @@
 package com.tomaszrykala.wordduel.game.processor
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.tomaszrykala.wordduel.game.board.Board
@@ -23,39 +24,44 @@ class GuessProcessor @Inject constructor(
     fun randomWord(): String = wordRepository.randomWord()
 
     fun onNextGuess(value: GameState.InProgress): GameState.InProgress {
-        val guess = value.guess
         val processed: GameState.InProgress = processGuess(value)
         val board = processed.board
 
         val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
         if (indexOfActive != -1) {
-            val tiles = mutableListOf<Tile>()
-            for (index in 0..4) {
-                val guessChars = guess.guess
-                if (index < guessChars.size && guessChars[index].isNotEmpty()) {
-                    tiles.add(Tile.Active(guessChars[index].last()))
-                } else {
-                    tiles.add(Tile.Active())
-                }
-            }
-
-            val updatedBoardRow = board.boardRows[indexOfActive].copy(
-                tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
-            )
-            val newBoardRows: List<BoardRow> = board.boardRows.mapIndexed { index, boardRow ->
-                if (index == indexOfActive) updatedBoardRow else boardRow
-            }
+            val newTiles = getNewTiles(value.guess)
+            val newBoardRows = getNewBoardRows(board, indexOfActive, newTiles)
             return processed.copy(
                 board = board.copy(boardRows = newBoardRows),
                 keyTiles = processed.keyTiles,
                 word = processed.word
             )
-
         } else {
-            return processed.copy(
-                keyTiles = processed.keyTiles,
-                word = processed.word
-            )
+            return processed.copy(keyTiles = processed.keyTiles, word = processed.word)
+        }
+    }
+
+    @VisibleForTesting
+    internal fun getNewTiles(guess: Guess): MutableList<Tile> {
+        val tiles = mutableListOf<Tile>()
+        for (index in 0..4) {
+            val guessChars = guess.guess
+            if (index < guessChars.size && guessChars[index].isNotEmpty()) {
+                tiles.add(Tile.Active(guessChars[index].last()))
+            } else {
+                tiles.add(Tile.Active())
+            }
+        }
+        return tiles
+    }
+
+    @VisibleForTesting
+    internal fun getNewBoardRows(board: Board, indexOfActive: Int, tiles: List<Tile>): List<BoardRow> {
+        val updatedBoardRow = board.boardRows[indexOfActive].copy(
+            tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
+        )
+        return board.boardRows.mapIndexed { index, boardRow ->
+            if (index == indexOfActive) updatedBoardRow else boardRow
         }
     }
 
@@ -76,31 +82,29 @@ class GuessProcessor @Inject constructor(
         val nextBoardRows = boardRows.toMutableList()
 
         val (processedBoardRow, newKeyTiles) = processBoardRow(word, inProgress.guess, inProgress.keyTiles)
+        val activeRowIndex = getActiveRowIndex(currentBoard, boardRows)
 
-        // make the previous row inactive
-        val indexOfInactive = if (currentBoard.isFull) {
-            boardRows.lastIndex
-        } else {
-            boardRows.indexOfFirst { it.isActive }
-        }
-
-        // prevent duplication on configuration change // TODO ?!
-        return if (indexOfInactive > 0 && processedBoardRow == boardRows[indexOfInactive - 1]) {
+        return if (ifSameAsThePreviousRow(activeRowIndex, processedBoardRow, boardRows)) {
             inProgress
         } else {
-            nextBoardRows[indexOfInactive] = processedBoardRow
+            nextBoardRows[activeRowIndex] = processedBoardRow
 
             // make the next one row active, unless the word has been guessed
-            if (indexOfInactive + 1 < nextBoardRows.size) {
+            if (activeRowIndex + 1 < nextBoardRows.size) {
                 if (!processedBoardRow.isGuessed) {
-                    nextBoardRows[indexOfInactive + 1] = emptyActiveBoardRow()
+                    nextBoardRows[activeRowIndex + 1] = emptyActiveBoardRow()
                 }
             }
-            GameState.InProgress(
-                word = word, board = Board(nextBoardRows), keyTiles = KeyTiles(newKeyTiles)
-            )
+            GameState.InProgress(word = word, board = Board(nextBoardRows), keyTiles = KeyTiles(newKeyTiles))
         }
     }
+
+    private fun getActiveRowIndex(currentBoard: Board, boardRows: List<BoardRow>): Int =
+        if (currentBoard.isFull) boardRows.lastIndex else boardRows.indexOfFirst { it.isActive }
+
+    private fun ifSameAsThePreviousRow(
+        activeRowIndex: Int, processedBoardRow: BoardRow, boardRows: List<BoardRow>
+    ) = activeRowIndex > 0 && processedBoardRow == boardRows[activeRowIndex - 1]
 
     private fun processNonWord(state: GameState.InProgress): GameState.InProgress {
         return if (state.guess.isFull()) {
@@ -110,11 +114,7 @@ class GuessProcessor @Inject constructor(
             val nextBoardRows = boardRows.toMutableList()
             nextBoardRows[indexOfActive] = emptyActiveBoardRow()
 
-            state.copy(
-                guess = Guess(),
-                board = Board(nextBoardRows),
-                nonWordEntered = true
-            )
+            state.copy(guess = Guess(), board = Board(nextBoardRows), nonWordEntered = true)
         } else state
     }
 
@@ -122,8 +122,8 @@ class GuessProcessor @Inject constructor(
         word: BoardRow, guess: Guess, keyTiles: KeyTiles
     ): Pair<BoardRow, List<List<KeyTile>>> {
 
-        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() } // TODO awful complexity
         val tilesAsWord = word.tilesAsWord
+        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() }
 
         val processed: List<Tile> = guess.guess.mapIndexed { index, letter ->
             val char: Char = letter.last()

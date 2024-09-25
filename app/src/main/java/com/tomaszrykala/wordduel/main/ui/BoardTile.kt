@@ -1,4 +1,4 @@
-package com.tomaszrykala.wordduel.game.board
+package com.tomaszrykala.wordduel.main.ui
 
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.tween
@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomaszrykala.wordduel.game.board.Tile
 import com.tomaszrykala.wordduel.ui.theme.WordDuelTheme
 
 @Composable

@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.state.KeyTiles
 
@@ -45,7 +44,7 @@ fun SoftKeyboard(
                     modifier = Modifier
                         .height(52.dp)
                         .padding(2.dp)
-                        .width(if (keyTileValue.key == KEY_DEL) 46.dp else 28.dp)
+                        .width(keyTileValue.width.dp)
                         .align(Alignment.CenterVertically),
                     elevation = ButtonDefaults.elevatedButtonElevation(),
                     shape = ShapeDefaults.ExtraSmall,
