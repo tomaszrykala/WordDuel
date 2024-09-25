@@ -2,13 +2,15 @@ package com.tomaszrykala.wordduel.repository
 
 import android.content.Context
 import com.tomaszrykala.wordduel.R
-import kotlinx.coroutines.Dispatchers
+import com.tomaszrykala.wordduel.di.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import javax.inject.Inject
 
 class WordRepository @Inject constructor(
-    private val readerFactory: BufferedReaderFactory
+    private val readerFactory: BufferedReaderFactory,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
 
     private val dictionary: Trie = Trie()
@@ -17,7 +19,7 @@ class WordRepository @Inject constructor(
     suspend fun initDictionary(context: Context): Result<Unit> {
         if (words.isEmpty()) {
             runCatching {
-                withContext(Dispatchers.IO) {
+                withContext(ioDispatcher) {
                     val inputStream: InputStream = context.resources.openRawResource(ALL_WORDS)
                     val reader = readerFactory.bufferedReader(inputStream)
                     val readLines = readerFactory.processLines(reader)
