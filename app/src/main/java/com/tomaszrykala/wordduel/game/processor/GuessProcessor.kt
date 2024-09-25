@@ -82,27 +82,29 @@ class GuessProcessor @Inject constructor(
         val nextBoardRows = boardRows.toMutableList()
 
         val (processedBoardRow, newKeyTiles) = processBoardRow(word, inProgress.guess, inProgress.keyTiles)
+        val activeRowIndex = getActiveRowIndex(currentBoard, boardRows)
 
-        // make the previous row inactive
-        val indexOfInactive = if (currentBoard.isFull) boardRows.lastIndex else boardRows.indexOfFirst { it.isActive }
-
-        // prevent duplication on configuration change // TODO ?!
-        return if (indexOfInactive > 0 && processedBoardRow == boardRows[indexOfInactive - 1]) {
+        return if (ifSameAsThePreviousRow(activeRowIndex, processedBoardRow, boardRows)) {
             inProgress
         } else {
-            nextBoardRows[indexOfInactive] = processedBoardRow
+            nextBoardRows[activeRowIndex] = processedBoardRow
 
             // make the next one row active, unless the word has been guessed
-            if (indexOfInactive + 1 < nextBoardRows.size) {
+            if (activeRowIndex + 1 < nextBoardRows.size) {
                 if (!processedBoardRow.isGuessed) {
-                    nextBoardRows[indexOfInactive + 1] = emptyActiveBoardRow()
+                    nextBoardRows[activeRowIndex + 1] = emptyActiveBoardRow()
                 }
             }
-            GameState.InProgress(
-                word = word, board = Board(nextBoardRows), keyTiles = KeyTiles(newKeyTiles)
-            )
+            GameState.InProgress(word = word, board = Board(nextBoardRows), keyTiles = KeyTiles(newKeyTiles))
         }
     }
+
+    private fun getActiveRowIndex(currentBoard: Board, boardRows: List<BoardRow>): Int =
+        if (currentBoard.isFull) boardRows.lastIndex else boardRows.indexOfFirst { it.isActive }
+
+    private fun ifSameAsThePreviousRow(
+        activeRowIndex: Int, processedBoardRow: BoardRow, boardRows: List<BoardRow>
+    ) = activeRowIndex > 0 && processedBoardRow == boardRows[activeRowIndex - 1]
 
     private fun processNonWord(state: GameState.InProgress): GameState.InProgress {
         return if (state.guess.isFull()) {
@@ -112,11 +114,7 @@ class GuessProcessor @Inject constructor(
             val nextBoardRows = boardRows.toMutableList()
             nextBoardRows[indexOfActive] = emptyActiveBoardRow()
 
-            state.copy(
-                guess = Guess(),
-                board = Board(nextBoardRows),
-                nonWordEntered = true
-            )
+            state.copy(guess = Guess(), board = Board(nextBoardRows), nonWordEntered = true)
         } else state
     }
 
