@@ -43,7 +43,7 @@ class WordRepository @Inject constructor(
 
     fun searchWord(word: String): Boolean = dictionary.search(word)
 
-    private companion object {
+    internal companion object {
         val ALL_WORDS = R.raw.words
         const val RE_INIT_ATTEMPT_ERROR = "Requested init of an already initialised Repository."
     }

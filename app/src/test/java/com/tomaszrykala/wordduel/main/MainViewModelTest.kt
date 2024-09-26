@@ -26,8 +26,6 @@ class MainViewModelTest {
 
     private val sut = MainViewModel(guessProcessor)
 
-    private val world = "WORLD"
-
     @Test
     fun `GIVEN success is returned WHEN onStart THEN set InProgress state`() = runTest {
         val context = mockk<Context>()
@@ -177,5 +175,9 @@ class MainViewModelTest {
             assertTrue(this is GameState.InProgress)
             assertEquals(Guess(listOf("A")), (this as GameState.InProgress).guess)
         }
+    }
+
+    private companion object {
+        private const val world = "WORLD"
     }
 }
