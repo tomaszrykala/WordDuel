@@ -3,6 +3,7 @@ package com.tomaszrykala.wordduel.main
 import android.content.Context
 import com.tomaszrykala.wordduel.MainDispatcherRule
 import com.tomaszrykala.wordduel.game.board.boardRowFromString
+import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.processor.GuessProcessor
 import com.tomaszrykala.wordduel.game.state.GameState
@@ -35,8 +36,10 @@ class MainViewModelTest {
 
         sut.onStart(context)
 
-        assertTrue(sut.state.value is GameState.InProgress)
-        assertEquals(boardRowFromString(world), (sut.state.value as GameState.InProgress).word)
+        with(sut.state.value) {
+            assertTrue(this is GameState.InProgress)
+            assertEquals(boardRowFromString(world), (this as GameState.InProgress).word)
+        }
     }
 
     @Test
@@ -47,8 +50,10 @@ class MainViewModelTest {
 
         sut.onStart(context)
 
-        assertTrue(sut.state.value is GameState.Error)
-        assertEquals(exception, (sut.state.value as GameState.Error).throwable)
+        with(sut.state.value) {
+            assertTrue(this is GameState.Error)
+            assertEquals(exception, (this as GameState.Error).throwable)
+        }
         coVerify(exactly = 0) { guessProcessor.randomWord() }
     }
 
@@ -58,8 +63,10 @@ class MainViewModelTest {
 
         sut.onNewGameClick()
 
-        assertTrue(sut.state.value is GameState.InProgress)
-        assertEquals(boardRowFromString(world), (sut.state.value as GameState.InProgress).word)
+        with(sut.state.value) {
+            assertTrue(this is GameState.InProgress)
+            assertEquals(boardRowFromString(world), (this as GameState.InProgress).word)
+        }
     }
 
     @Test
@@ -78,7 +85,6 @@ class MainViewModelTest {
         sut.onNextGuess()
 
         assertTrue(sut.state.value is GameState.Init)
-
         coVerify(exactly = 0) { guessProcessor.onNextGuess(any()) }
     }
 
@@ -86,8 +92,9 @@ class MainViewModelTest {
     fun `GIVEN processed guess is full WHEN onNextGuess THEN reset current Guess`() = runTest {
         coEvery { guessProcessor.randomWord() } returns world
         sut.onNewGameClick()
+        val keyTile = KeyTile(key = "A")
         for (i in 0 until 5) {
-            sut.onKeyTileClick(KeyTile(key = "A"))
+            sut.onKeyTileClick(keyTile)
         }
         assertTrue(sut.state.value is GameState.InProgress)
         val fullGuess = Guess(world.map { it.toString() })
@@ -96,8 +103,10 @@ class MainViewModelTest {
 
         sut.onNextGuess()
 
-        assertTrue(sut.state.value is GameState.InProgress)
-        assertEquals(Guess(), (sut.state.value as GameState.InProgress).guess)
+        with(sut.state.value) {
+            assertTrue(this is GameState.InProgress)
+            assertEquals(Guess(), (this as GameState.InProgress).guess)
+        }
     }
 
     @Test
@@ -111,8 +120,62 @@ class MainViewModelTest {
 
         sut.onNextGuess()
 
+        with(sut.state.value) {
+            assertTrue(this is GameState.InProgress)
+            assertEquals(resultProgress, this as GameState.InProgress)
+            assertEquals(partialGuess, (this as GameState.InProgress).guess)
+        }
+    }
+
+    @Test
+    fun `GIVEN state is not InProgress WHEN onKeyTileClick THEN do not do anything`() = runTest {
+        sut.onKeyTileClick(KeyTile(key = "A"))
+
+        assertTrue(sut.state.value is GameState.Init)
+    }
+
+    @Test
+    fun `GIVEN KEY_DEL key is entered but Guess is empty WHEN onKeyTileClick THEN do not do anything`() = runTest {
+        coEvery { guessProcessor.randomWord() } returns world
+        sut.onNewGameClick()
         assertTrue(sut.state.value is GameState.InProgress)
-        assertEquals(resultProgress, sut.state.value as GameState.InProgress)
-        assertEquals(partialGuess, (sut.state.value as GameState.InProgress).guess)
+
+        sut.onKeyTileClick(KeyTile(key = KEY_DEL))
+
+        with(sut.state.value) {
+            assertTrue(this is GameState.InProgress)
+            assertEquals(Guess(), (this as GameState.InProgress).guess)
+        }
+    }
+
+    @Test
+    fun `GIVEN a Key is entered in a Guess WHEN onKeyTileClick THEN add that Key`() = runTest {
+        coEvery { guessProcessor.randomWord() } returns world
+        sut.onNewGameClick()
+        assertTrue(sut.state.value is GameState.InProgress)
+
+        sut.onKeyTileClick(KeyTile("A"))
+        assertEquals(Guess(listOf("A")), (sut.state.value as GameState.InProgress).guess)
+
+        sut.onKeyTileClick(KeyTile("B"))
+        assertEquals(Guess(listOf("A", "B")), (sut.state.value as GameState.InProgress).guess)
+    }
+
+    @Test
+    fun `GIVEN KEY_DEL is entered in a Guess WHEN onKeyTileClick THEN decrease by a character`() = runTest {
+        coEvery { guessProcessor.randomWord() } returns world
+        sut.onNewGameClick()
+        assertTrue(sut.state.value is GameState.InProgress)
+
+        sut.onKeyTileClick(KeyTile("A"))
+        sut.onKeyTileClick(KeyTile("B"))
+        assertEquals(Guess(listOf("A", "B")), (sut.state.value as GameState.InProgress).guess)
+
+        sut.onKeyTileClick(KeyTile(key = KEY_DEL))
+
+        with(sut.state.value) {
+            assertTrue(this is GameState.InProgress)
+            assertEquals(Guess(listOf("A")), (this as GameState.InProgress).guess)
+        }
     }
 }
