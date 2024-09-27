@@ -19,16 +19,26 @@ fun emptyInactiveBoardRow() = BoardRow(
     Tile.Inactive, Tile.Inactive, Tile.Inactive, Tile.Inactive, Tile.Inactive
 )
 
-fun boardRowFromString(word: String): BoardRow {
+fun boardRowFromString(word: String, isActive: Boolean = false): BoardRow {
     if (word.length != 5) {
         throw IllegalArgumentException("The word must be 5-chars long.")
     } else {
-        return BoardRow(
-            tile0 = Tile.Hit(word[0]),
-            tile1 = Tile.Hit(word[1]),
-            tile2 = Tile.Hit(word[2]),
-            tile3 = Tile.Hit(word[3]),
-            tile4 = Tile.Hit(word[4]),
-        )
+        return if (isActive) {
+            BoardRow(
+                tile0 = Tile.Active(word[0]),
+                tile1 = Tile.Active(word[1]),
+                tile2 = Tile.Active(word[2]),
+                tile3 = Tile.Active(word[3]),
+                tile4 = Tile.Active(word[4]),
+            )
+        } else {
+            BoardRow(
+                tile0 = Tile.Hit(word[0]),
+                tile1 = Tile.Hit(word[1]),
+                tile2 = Tile.Hit(word[2]),
+                tile3 = Tile.Hit(word[3]),
+                tile4 = Tile.Hit(word[4]),
+            )
+        }
     }
 }

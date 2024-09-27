@@ -14,6 +14,7 @@ import com.tomaszrykala.wordduel.game.state.Guess
 import com.tomaszrykala.wordduel.game.board.KeyTiles
 import com.tomaszrykala.wordduel.repository.WordRepository
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 class GuessProcessor @Inject constructor(
     private val wordRepository: WordRepository
@@ -57,12 +58,14 @@ class GuessProcessor @Inject constructor(
 
     @VisibleForTesting
     internal fun getNewBoardRows(boardRows: List<BoardRow>, indexOfActive: Int, tiles: List<Tile>): List<BoardRow> {
-        val updatedBoardRow = boardRows[indexOfActive].copy(
-            tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
-        )
-        return boardRows.mapIndexed { index, boardRow ->
-            if (index == indexOfActive) updatedBoardRow else boardRow
-        }
+        return if (boardRows.size > indexOfActive.absoluteValue) {
+            val updatedBoardRow = boardRows[indexOfActive].copy(
+                tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
+            )
+            boardRows.mapIndexed { index, boardRow ->
+                if (index == indexOfActive) updatedBoardRow else boardRow
+            }
+        } else boardRows
     }
 
     private fun processGuess(inProgress: GameState.InProgress): GameState.InProgress {
@@ -123,7 +126,7 @@ class GuessProcessor @Inject constructor(
     ): Pair<BoardRow, List<List<KeyTile>>> {
 
         val tilesAsWord = word.tilesAsWord
-        val mutableKeyTiles = keyTiles.keyTiles.map { it.toMutableList() }
+        val mutableKeyTiles = keyTiles.allTiles.map { it.toMutableList() }
 
         val processed: List<Tile> = guess.guess.mapIndexed { index, letter ->
             val char: Char = letter.last()
