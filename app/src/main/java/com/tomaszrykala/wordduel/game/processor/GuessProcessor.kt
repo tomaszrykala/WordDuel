@@ -30,7 +30,7 @@ class GuessProcessor @Inject constructor(
         val indexOfActive = board.boardRows.indexOfFirst { it.isActive }
         if (indexOfActive != -1) {
             val newTiles = getNewTiles(value.guess)
-            val newBoardRows = getNewBoardRows(board, indexOfActive, newTiles)
+            val newBoardRows = getNewBoardRows(board.boardRows, indexOfActive, newTiles)
             return processed.copy(
                 board = board.copy(boardRows = newBoardRows),
                 keyTiles = processed.keyTiles,
@@ -42,7 +42,7 @@ class GuessProcessor @Inject constructor(
     }
 
     @VisibleForTesting
-    internal fun getNewTiles(guess: Guess): MutableList<Tile> {
+    internal fun getNewTiles(guess: Guess): List<Tile> {
         val tiles = mutableListOf<Tile>()
         for (index in 0..4) {
             val guessChars = guess.guess
@@ -56,11 +56,11 @@ class GuessProcessor @Inject constructor(
     }
 
     @VisibleForTesting
-    internal fun getNewBoardRows(board: Board, indexOfActive: Int, tiles: List<Tile>): List<BoardRow> {
-        val updatedBoardRow = board.boardRows[indexOfActive].copy(
+    internal fun getNewBoardRows(boardRows: List<BoardRow>, indexOfActive: Int, tiles: List<Tile>): List<BoardRow> {
+        val updatedBoardRow = boardRows[indexOfActive].copy(
             tile0 = tiles[0], tile1 = tiles[1], tile2 = tiles[2], tile3 = tiles[3], tile4 = tiles[4]
         )
-        return board.boardRows.mapIndexed { index, boardRow ->
+        return boardRows.mapIndexed { index, boardRow ->
             if (index == indexOfActive) updatedBoardRow else boardRow
         }
     }
