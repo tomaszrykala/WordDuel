@@ -11,7 +11,7 @@ import com.tomaszrykala.wordduel.game.board.emptyActiveBoardRow
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.state.GameState
 import com.tomaszrykala.wordduel.game.state.Guess
-import com.tomaszrykala.wordduel.game.state.KeyTiles
+import com.tomaszrykala.wordduel.game.board.KeyTiles
 import com.tomaszrykala.wordduel.repository.WordRepository
 import javax.inject.Inject
 
