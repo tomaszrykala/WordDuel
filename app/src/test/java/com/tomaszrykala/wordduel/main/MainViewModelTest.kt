@@ -2,7 +2,7 @@ package com.tomaszrykala.wordduel.main
 
 import android.content.Context
 import com.tomaszrykala.wordduel.MainDispatcherRule
-import com.tomaszrykala.wordduel.game.board.boardRowFromString
+import com.tomaszrykala.wordduel.game.board.hitBoardRowFromString
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.processor.GuessProcessor
@@ -36,7 +36,7 @@ class MainViewModelTest {
 
         with(sut.state.value) {
             assertTrue(this is GameState.InProgress)
-            assertEquals(boardRowFromString(world), (this as GameState.InProgress).word)
+            assertEquals(hitBoardRowFromString(world), (this as GameState.InProgress).word)
         }
     }
 
@@ -63,7 +63,7 @@ class MainViewModelTest {
 
         with(sut.state.value) {
             assertTrue(this is GameState.InProgress)
-            assertEquals(boardRowFromString(world), (this as GameState.InProgress).word)
+            assertEquals(hitBoardRowFromString(world), (this as GameState.InProgress).word)
         }
     }
 

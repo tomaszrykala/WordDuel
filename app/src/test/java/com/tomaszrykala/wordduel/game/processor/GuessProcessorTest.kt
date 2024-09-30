@@ -8,7 +8,7 @@ import com.tomaszrykala.wordduel.game.board.Board
 import com.tomaszrykala.wordduel.game.board.BoardRow
 import com.tomaszrykala.wordduel.game.board.KeyTiles
 import com.tomaszrykala.wordduel.game.board.Tile
-import com.tomaszrykala.wordduel.game.board.boardRowFromString
+import com.tomaszrykala.wordduel.game.board.hitBoardRowFromString
 import com.tomaszrykala.wordduel.game.board.emptyActiveBoardRow
 import com.tomaszrykala.wordduel.game.board.emptyInactiveBoardRow
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
@@ -108,7 +108,13 @@ class GuessProcessorTest {
     @Test
     fun `WHEN getNewBoardRows THEN return remapped BoardRows`() {
         val boardRows = listOf(emptyActiveBoardRow(), emptyInactiveBoardRow())
-        val worldAsString = boardRowFromString(word, true)
+        val worldAsString = BoardRow(
+            tile0 = Tile.Active(word[0]),
+            tile1 = Tile.Active(word[1]),
+            tile2 = Tile.Active(word[2]),
+            tile3 = Tile.Active(word[3]),
+            tile4 = Tile.Active(word[4]),
+        )
 
         val rows = sut.getNewBoardRows(boardRows, 0, worldAsString.tiles)
 
@@ -118,7 +124,7 @@ class GuessProcessorTest {
     @Test
     fun `GIVEN the word is guessed and the board full WHEN onNextGuess THEN return inProgress`() {
         val gameState = GameState.InProgress(
-            word = boardRowFromString(word),
+            word = hitBoardRowFromString(word),
             board = Board(listOf(emptyInactiveBoardRow()))
         )
 
@@ -172,17 +178,55 @@ class GuessProcessorTest {
         assertEquals(expected, result)
     }
 
-//    @Test // Add for Miss and Misplaced
-//    fun `GIVEN a missed valid word is entered WHEN onNextGuess THEN return processed state and set keys to DarkGray`() {
-//        val guessWord = "WURST"
-//        every { wordRepository.searchWord(guessWord.lowercase()) } returns true
-//        val gameState = getValidWordInitialState(guessWord)
-//
-//        val result = sut.onNextGuess(gameState)
-//
-//        val expected = getValidWordExpectedResult(guessWord, gameState, Color.DarkGray)
-//        assertEquals(expected, result)
-//    }
+    @Test
+    fun `GIVEN a missed valid word is entered WHEN onNextGuess THEN return processed state and set keys to DarkGray`() {
+        val guessWord = "WURST"
+        every { wordRepository.searchWord(guessWord.lowercase()) } returns true
+        val gameState = getValidWordInitialState(guessWord)
+
+        val result = sut.onNextGuess(gameState)
+
+        val expected = getValidWordExpectedResult(
+            guessWord,
+            gameState,
+            Color.DarkGray,
+            isGuessed = false,
+            isEnded = false,
+            guessRow = BoardRow(
+                tile0 = Tile.Miss(guessWord[0]),
+                tile1 = Tile.Miss(guessWord[1]),
+                tile2 = Tile.Miss(guessWord[2]),
+                tile3 = Tile.Miss(guessWord[3]),
+                tile4 = Tile.Miss(guessWord[4]),
+            )
+        )
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `GIVEN a word with misplaced Chars is entered WHEN onNextGuess THEN return processed state and set keys to Yellow`() {
+        val guessWord = "LOHEL"
+        every { wordRepository.searchWord(guessWord.lowercase()) } returns true
+        val gameState = getValidWordInitialState(guessWord)
+
+        val result = sut.onNextGuess(gameState)
+
+        val expected = getValidWordExpectedResult(
+            guessWord,
+            gameState,
+            Color.Yellow,
+            isGuessed = false,
+            isEnded = false,
+            guessRow = BoardRow(
+                tile0 = Tile.Misplaced(guessWord[0]),
+                tile1 = Tile.Misplaced(guessWord[1]),
+                tile2 = Tile.Misplaced(guessWord[2]),
+                tile3 = Tile.Misplaced(guessWord[3]),
+                tile4 = Tile.Misplaced(guessWord[4]),
+            )
+        )
+        assertEquals(expected, result)
+    }
 
     private fun getValidWordInitialState(guessWord: String): GameState.InProgress {
         val gameState = GameState.InProgress(
@@ -196,7 +240,13 @@ class GuessProcessorTest {
             guess = Guess(guessWord.toList().map { it.toString() }),
             board = Board(
                 listOf(
-                    boardRowFromString(guessWord, true),
+                    BoardRow(
+                        tile0 = Tile.Active(guessWord[0]),
+                        tile1 = Tile.Active(guessWord[1]),
+                        tile2 = Tile.Active(guessWord[2]),
+                        tile3 = Tile.Active(guessWord[3]),
+                        tile4 = Tile.Active(guessWord[4]),
+                    ),
                     emptyInactiveBoardRow()
                 ),
             )
@@ -205,7 +255,12 @@ class GuessProcessorTest {
     }
 
     private fun getValidWordExpectedResult(
-        guessWord: String, gameState: GameState.InProgress, color: Color
+        guessWord: String,
+        gameState: GameState.InProgress,
+        color: Color,
+        isGuessed: Boolean = true,
+        isEnded: Boolean = true,
+        guessRow: BoardRow = hitBoardRowFromString(guessWord),
     ): GameState.InProgress {
         val function: (s: String) -> KeyTile =
             { if (guessWord.contains(it)) KeyTile(it, color = color.toArgb()) else KeyTile(it) }
@@ -214,19 +269,21 @@ class GuessProcessorTest {
         val bottom = listOf("Z", "X", "C", "V", "B", "N", "M", KEY_DEL)
             .map { function.invoke(it) }
             .map { if (it.key == KEY_DEL) it.copy(width = KEY_DEL_SIZE) else it }
-        val expected = gameState.copy(
+
+        val nextBoardRow = if (isGuessed) emptyInactiveBoardRow() else BoardRow(
+            tile0 = Tile.Active(guessWord[0]),
+            tile1 = Tile.Active(guessWord[1]),
+            tile2 = Tile.Active(guessWord[2]),
+            tile3 = Tile.Active(guessWord[3]),
+            tile4 = Tile.Active(guessWord[4]),
+        )
+
+        return gameState.copy(
             guess = Guess(),
-            isGuessed = true,
-            isEnded = true,
-            board = Board(
-                listOf(
-                    boardRowFromString(guessWord),
-                    emptyInactiveBoardRow()
-                ),
-            ),
+            isGuessed = isGuessed,
+            isEnded = isEnded,
+            board = Board(listOf(guessRow, nextBoardRow)),
             keyTiles = KeyTiles(listOf(top, mid, bottom))
         )
-        return expected
     }
-
 }

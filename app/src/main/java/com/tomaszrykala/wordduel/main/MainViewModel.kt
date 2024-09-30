@@ -3,7 +3,7 @@ package com.tomaszrykala.wordduel.main
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tomaszrykala.wordduel.game.board.boardRowFromString
+import com.tomaszrykala.wordduel.game.board.hitBoardRowFromString
 import com.tomaszrykala.wordduel.game.keyboard.KEY_DEL
 import com.tomaszrykala.wordduel.game.keyboard.KeyTile
 import com.tomaszrykala.wordduel.game.processor.GuessProcessor
@@ -32,7 +32,7 @@ class MainViewModel @Inject constructor(
                 guessProcessor.init(context).fold(
                     onSuccess = {
                         val word = guessProcessor.randomWord()
-                        _state.value = GameState.InProgress(word = boardRowFromString(word))
+                        _state.value = GameState.InProgress(word = hitBoardRowFromString(word))
                     },
                     onFailure = { _state.value = GameState.Error(it) }
                 )
@@ -57,7 +57,7 @@ class MainViewModel @Inject constructor(
     fun onNewGameClick() {
         currentGuess = Guess()
         val word = guessProcessor.randomWord()
-        _state.value = GameState.InProgress(word = boardRowFromString(word))
+        _state.value = GameState.InProgress(word = hitBoardRowFromString(word))
     }
 
     fun onRetry() {
