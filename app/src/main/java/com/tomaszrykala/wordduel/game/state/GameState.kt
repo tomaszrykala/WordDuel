@@ -2,8 +2,7 @@ package com.tomaszrykala.wordduel.game.state
 
 import com.tomaszrykala.wordduel.game.board.Board
 import com.tomaszrykala.wordduel.game.board.BoardRow
-import com.tomaszrykala.wordduel.game.keyboard.KeyTile
-import com.tomaszrykala.wordduel.game.keyboard.createKeyTiles
+import com.tomaszrykala.wordduel.game.board.KeyTiles
 
 sealed class GameState {
     data object Init : GameState()
@@ -20,13 +19,3 @@ sealed class GameState {
     ) : GameState()
 }
 
-data class Guess(val guess: List<String> = listOf()) {
-    fun isFull(): Boolean = with(guess) { size == 5 && this.all { it != "" } }
-    fun asString(): String = guess.joinToString(separator = "") { it }.lowercase()
-}
-
-data class KeyTiles(val keyTiles: List<List<KeyTile>> = createKeyTiles()) {
-    val top get() = keyTiles[0]
-    val mid get() = keyTiles[1]
-    val bottom get() = keyTiles[2]
-}

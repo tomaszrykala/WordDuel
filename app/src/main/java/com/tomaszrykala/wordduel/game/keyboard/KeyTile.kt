@@ -10,12 +10,13 @@ data class KeyTile(
 fun createKeyTiles(): List<List<KeyTile>> {
     val top = keyboardTopRow.map { KeyTile(it) }
     val mid = keyboardMidRow.map { KeyTile(it) }
-    val bottom = keyboardBottomRow.map { if (it == KEY_DEL) KeyTile(it, width = 46) else KeyTile(it) }
+    val bottom = keyboardBottomRow.map { if (it == KEY_DEL) KeyTile(it, width = KEY_DEL_SIZE) else KeyTile(it) }
 
     return listOf(top, mid, bottom)
 }
 
-const val KEY_DEL = "[DEL]"
+internal const val KEY_DEL = "[DEL]"
+internal const val KEY_DEL_SIZE = 46
 private const val SIZE_DEFAULT = 28
 private val COLOR_DEFAULT = Color.LightGray.toArgb()
 

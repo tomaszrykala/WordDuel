@@ -19,7 +19,8 @@ fun emptyInactiveBoardRow() = BoardRow(
     Tile.Inactive, Tile.Inactive, Tile.Inactive, Tile.Inactive, Tile.Inactive
 )
 
-fun boardRowFromString(word: String): BoardRow {
+// Add Tile arg
+fun hitBoardRowFromString(word: String): BoardRow {
     if (word.length != 5) {
         throw IllegalArgumentException("The word must be 5-chars long.")
     } else {
